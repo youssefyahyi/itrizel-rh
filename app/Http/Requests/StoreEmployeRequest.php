@@ -1,0 +1,44 @@
+<?php
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreEmployeRequest extends FormRequest
+{
+    public function authorize(): bool { return true; }
+
+    public function rules(): array
+    {
+        return [
+            "nom"                => ["required","string","max:100"],
+            "prenom"             => ["required","string","max:100"],
+            "cin"                => ["required","string","max:20","unique:employes,cin"],
+            "date_naissance"     => ["required","date","before:today"],
+            "sexe"               => ["required","in:M,F"],
+            "categorie"          => ["required","in:commercial,chauffeur,magasinier,logisticien,administratif,cadre"],
+            "poste"              => ["required","string","max:150"],
+            "date_embauche"      => ["required","date"],
+            "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],
+            "nombre_enfants"     => ["required","integer","min:0","max:20"],
+            "email"              => ["nullable","email","unique:employes,email"],
+            "telephone"          => ["nullable","string","max:20"],
+            "adresse"            => ["nullable","string","max:255"],
+            "ville"              => ["nullable","string","max:100"],
+            "diplome"            => ["nullable","string","max:150"],
+            "specialite"         => ["nullable","string","max:150"],
+            "rib"                => ["nullable","string","max:30"],
+            "banque"             => ["nullable","string","max:100"],
+            "numero_cnss"        => ["nullable","string","max:30"],
+            "numero_amo"         => ["nullable","string","max:30"],
+            "photo"              => ["nullable","image","max:2048"],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            "cin.unique"   => "Ce numéro de CIN est déjà enregistré.",
+            "email.unique" => "Cette adresse email est déjà utilisée.",
+        ];
+    }
+}

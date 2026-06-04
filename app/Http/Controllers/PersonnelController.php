@@ -1,0 +1,147 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\Employe;
+use App\Models\AuditLog;
+use App\Http\Requests\StoreEmployeRequest;
+use App\Http\Requests\UpdateEmployeRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class PersonnelController extends Controller
+{
+    // ── Liste ──────────────────────────────────────────────────────
+    public function index(Request $request)
+    {
+        $query = Employe::with("contratActif")->orderBy("nom");
+
+        if ($request->filled("q")) {
+            $query->where(function ($q) use ($request) {
+                $q->where("nom", "like", "%{$request->q}%")
+                  ->orWhere("prenom", "like", "%{$request->q}%")
+                  ->orWhere("matricule", "like", "%{$request->q}%")
+                  ->orWhere("cin", "like", "%{$request->q}%");
+            });
+        }
+
+        if ($request->filled("categorie")) {
+            $query->where("categorie", $request->categorie);
+        }
+
+        if ($request->filled("statut")) {
+            $query->where("statut", $request->statut);
+        }
+
+        $employes = $query->paginate(20)->withQueryString();
+
+        $stats = [
+            "total"    => Employe::count(),
+            "actifs"   => Employe::where("statut", "actif")->count(),
+            "inactifs" => Employe::whereIn("statut", ["inactif", "suspendu"])->count(),
+            "expires"  => Employe::whereHas("contratActif", fn($q) =>
+                              $q->whereNotNull("date_fin")
+                               ->whereBetween("date_fin", [now(), now()->addDays(30)])
+                          )->count(),
+        ];
+
+        return view("personnel.index", compact("employes", "stats"));
+    }
+
+    // ── Formulaire création ────────────────────────────────────────
+    public function create()
+    {
+        return view("personnel.form", ["employe" => new Employe, "mode" => "create"]);
+    }
+
+    // ── Enregistrement ─────────────────────────────────────────────
+    public function store(StoreEmployeRequest $request)
+    {
+        $data = $request->validated();
+        $data["created_by"]  = auth()->id();
+        $data["matricule"]   = $this->generateMatricule();
+
+        if ($request->hasFile("photo")) {
+            $data["photo"] = $request->file("photo")->store("employes/photos", "public");
+        }
+
+        $employe = Employe::create($data);
+
+        AuditLog::log("Personnel", "creation", "Création de l employé {$employe->nom_complet} ({$employe->matricule})", $employe);
+
+        return redirect()
+            ->route("personnel.show", $employe)
+            ->with("success", "Employé {$employe->nom_complet} créé avec succès.");
+    }
+
+    // ── Détail ─────────────────────────────────────────────────────
+    public function show(Employe $employe)
+    {
+        $employe->load([
+            "contrats"      => fn($q) => $q->latest(),
+            "conges"        => fn($q) => $q->latest()->limit(5),
+            "bulletinsPaie" => fn($q) => $q->latest()->limit(5),
+        ]);
+        $auditLogs = \App\Models\AuditLog::where("module", "Personnel")
+                        ->where("description", "like", "%{$employe->matricule}%")
+                        ->latest()->limit(20)->with("user")->get();
+        return view("personnel.show", compact("employe", "auditLogs"));
+    }
+
+    // ── Formulaire édition ─────────────────────────────────────────
+    public function edit(Employe $employe)
+    {
+        return view("personnel.form", ["employe" => $employe, "mode" => "edit"]);
+    }
+
+    // ── Mise à jour ────────────────────────────────────────────────
+    public function update(UpdateEmployeRequest $request, Employe $employe)
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile("photo")) {
+            $data["photo"] = $request->file("photo")->store("employes/photos", "public");
+        }
+
+        $employe->update($data);
+
+        AuditLog::log("Personnel", "modification", "Modification de l employé {$employe->nom_complet}", $employe);
+
+        return redirect()
+            ->route("personnel.show", $employe)
+            ->with("success", "Employé mis à jour.");
+    }
+
+    // ── Suppression (soft delete) ──────────────────────────────────
+    public function destroy(Employe $employe)
+    {
+        AuditLog::log("Personnel", "suppression", "Suppression de l employé {$employe->nom_complet}", $employe);
+        $employe->delete();
+
+        return redirect()
+            ->route("personnel.index")
+            ->with("success", "Employé archivé.");
+    }
+
+    // ── Changement de statut ───────────────────────────────────────
+    public function toggleStatut(Employe $employe)
+    {
+        $statut = $employe->statut === "actif" ? "inactif" : "actif";
+        $employe->update(["statut" => $statut]);
+
+        AuditLog::log("Personnel", "statut", "Statut de {$employe->nom_complet} changé en {$statut}", $employe);
+
+        return back()->with("success", "Statut mis à jour.");
+    }
+
+    // ── Génération du matricule ────────────────────────────────────
+    private function generateMatricule(): string
+    {
+        $annee   = date("Y");
+        $dernier = Employe::where("matricule", "like", "EMP-{$annee}-%")
+                          ->orderByDesc("matricule")
+                          ->value("matricule");
+
+        $seq = $dernier ? (int) substr($dernier, -4) + 1 : 1;
+        return "EMP-{$annee}-" . str_pad($seq, 4, "0", STR_PAD_LEFT);
+    }
+}
