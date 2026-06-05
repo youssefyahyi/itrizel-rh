@@ -179,13 +179,124 @@
     .pag-btn:hover { border-color: var(--border-hover); background: var(--surface-soft); }
     .pag-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .pag-btn[disabled] { opacity: 0.4; cursor: default; }
+
+    /* ══════════════════════════════════════════════
+       RESPONSIVE MOBILE  ≤ 768px
+    ══════════════════════════════════════════════ */
+
+    /* Éléments visibles uniquement sur mobile */
+    .mobile-burger { display: none; }
+    .mobile-brand  { display: none; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
+    .bottom-nav { display: none; }
+
+    @media (max-width: 768px) {
+
+        /* ── Topbar mobile ── */
+        .topbar-logo  { display: none; }
+        .topbar-brand { display: none; }
+        .topbar-center { display: none; }
+        .tb-assist { display: none; }
+
+        .topbar { padding: 0 12px; gap: 10px; }
+
+        .mobile-burger {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: var(--radius-sm);
+            background: none; border: none; cursor: pointer;
+            color: var(--text-secondary); flex-shrink: 0;
+        }
+        .mobile-burger:hover { background: var(--bg); }
+        .mobile-burger svg { width: 20px; height: 20px; }
+
+        .mobile-brand {
+            display: flex; align-items: center; gap: 8px; flex: 1;
+        }
+        .mobile-brand img { height: 26px; width: auto; }
+        .mobile-brand-text { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+        .mobile-brand-sub  { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; }
+
+        /* ── Sidebar drawer ── */
+        .sidebar {
+            position: fixed !important;
+            top: 0; left: 0; bottom: 0;
+            z-index: 200;
+            width: 260px !important;
+            min-width: 0 !important;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            overflow-y: auto;
+        }
+        .sidebar.mobile-open { transform: translateX(0); }
+        .sidebar.slim { width: 260px !important; }
+        .sidebar.slim .nav-text { opacity: 1; width: auto; }
+        .sidebar.slim .nav-section { opacity: 1; height: auto; padding: 14px 18px 4px; }
+        .sidebar.slim .nav-item { justify-content: flex-start; padding: 9px 12px; }
+        .sidebar.slim .sidebar-user { justify-content: flex-start; padding: 12px 14px; }
+        .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block; }
+        .sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* ── Body & contenu ── */
+        .body { position: relative; }
+        #admin-panel { display: none !important; }
+        .content { padding-bottom: 64px; } /* espace pour la bottom nav */
+
+        /* ── Toolbar liste ── */
+        .list-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
+        .search-box { min-width: 0; width: 100%; }
+        .tb-spacer { display: none; }
+
+        /* ── Tables → scroll horizontal ── */
+        .table-wrap { -webkit-overflow-scrolling: touch; }
+        thead th, tbody td { padding: 10px 12px; font-size: 12px; }
+
+        /* ── Pagination mobile ── */
+        .pag-info { display: none; }
+        .pagination { justify-content: center; }
+
+        /* ── Bottom navigation ── */
+        .bottom-nav {
+            display: flex;
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            height: 60px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+        }
+        .bn-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 3px; text-decoration: none;
+            color: var(--text-muted); font-size: 10px; font-weight: 500;
+            cursor: pointer; background: none; border: none; font-family: inherit;
+            transition: color 0.15s;
+        }
+        .bn-item.active { color: var(--accent); }
+        .bn-item svg { width: 20px; height: 20px; }
+        .bn-item span { font-size: 10px; }
+    }
     </style>
 </head>
 <body data-admin-panel="{{ request()->routeIs('admin.*') ? 'open' : 'closed' }}">
 <div class="app">
 
-    {{-- ══ TOPBAR (copie exacte du prototype) ══ --}}
+    {{-- ══ TOPBAR ══ --}}
     <div class="topbar">
+
+        {{-- Burger mobile (caché sur desktop) --}}
+        <button class="mobile-burger" onclick="mobileToggleSidebar()" aria-label="Menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+
+        {{-- Brand mobile (caché sur desktop) --}}
+        <div class="mobile-brand">
+            <img src="{{ asset('images/itrizel-mark.png') }}" alt="Itrizel">
+            <div>
+                <div class="mobile-brand-text">Itrizel</div>
+                <div class="mobile-brand-sub">RH</div>
+            </div>
+        </div>
+
         <div class="topbar-logo" id="topbar-logo">
             <img src="{{ asset('images/itrizel-mark.png') }}" alt="Itrizel">
             <div class="logo-lockup">
@@ -393,6 +504,33 @@
     </div>
 </div>
 
+{{-- Overlay sidebar mobile --}}
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="mobileToggleSidebar()"></div>
+
+{{-- Bottom navigation mobile --}}
+<nav class="bottom-nav">
+    <a href="{{ route('dashboard') }}" class="bn-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span>Accueil</span>
+    </a>
+    <a href="{{ route('personnel.index') }}" class="bn-item {{ request()->routeIs('personnel.*') ? 'active' : '' }}">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>Personnel</span>
+    </a>
+    <a href="{{ route('conges.index') }}" class="bn-item {{ request()->routeIs('conges.*') ? 'active' : '' }}">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Congés</span>
+    </a>
+    <a href="{{ route('paie.index') }}" class="bn-item {{ request()->routeIs('paie.*') ? 'active' : '' }}">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <span>Paie</span>
+    </a>
+    <button class="bn-item" onclick="mobileToggleSidebar()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        <span>Menu</span>
+    </button>
+</nav>
+
 {{-- Popup assistance (ancrée sous le bouton topbar) --}}
 <div class="assistance-popup" id="assistance-popup" style="position:fixed;top:56px;right:16px;bottom:auto;">
     <div class="assistance-popup-header"><h4>Assistance GCM</h4><p>Envoyez un message à l'équipe technique</p></div>
@@ -476,6 +614,23 @@ document.addEventListener('click', function(e) {
         menu.style.display = 'none';
 });
 window.addEventListener('pageshow', e => { if (e.persisted) window.location.reload(); });
+
+function mobileToggleSidebar() {
+    var sidebar  = document.getElementById('sidebar');
+    var overlay  = document.getElementById('sidebar-overlay');
+    var isOpen   = sidebar.classList.contains('mobile-open');
+    sidebar.classList.toggle('mobile-open', !isOpen);
+    overlay.classList.toggle('active', !isOpen);
+    document.body.style.overflow = isOpen ? '' : 'hidden';
+}
+// Fermer le drawer quand on clique un lien nav sur mobile
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar .nav-item, .sidebar .nav-sub-item').forEach(function(el) {
+        el.addEventListener('click', function() {
+            if (window.innerWidth <= 768) mobileToggleSidebar();
+        });
+    });
+});
 </script>
 
 @can('admin')
