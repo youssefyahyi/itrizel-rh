@@ -229,12 +229,17 @@
             overflow-y: auto;
         }
         .sidebar.mobile-open { transform: translateX(0); }
-        /* Annuler le mode slim sur mobile */
-        .sidebar.slim { width: 280px !important; }
-        .sidebar.slim .nav-text { opacity: 1 !important; width: auto !important; }
-        .sidebar.slim .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; }
+        /* Annuler le mode slim sur mobile — cibler les deux états */
+        .sidebar, .sidebar.slim { width: 280px !important; }
+        .sidebar .nav-text,
+        .sidebar.slim .nav-text { opacity: 1 !important; width: auto !important; overflow: visible !important; }
+        .sidebar .nav-section,
+        .sidebar.slim .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; margin: 0 !important; }
+        .sidebar .nav-item,
         .sidebar.slim .nav-item { justify-content: flex-start !important; padding: 9px 12px !important; margin: 1px 8px !important; }
+        .sidebar .sidebar-user,
         .sidebar.slim .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
+        .sidebar .u-info, .sidebar .u-logout,
         .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block !important; }
         /* Cacher le bouton collapse sur mobile */
         .sidebar .nav-toggle { display: none !important; }
