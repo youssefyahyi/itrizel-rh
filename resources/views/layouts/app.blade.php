@@ -237,7 +237,7 @@
         .sidebar.slim .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
         .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block !important; }
         /* Cacher le bouton collapse sur mobile */
-        .sidebar .nav-toggle { display: none; }
+        .sidebar .nav-toggle { display: none !important; }
         /* En-tête du drawer avec bouton fermer */
         .sidebar-mobile-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -652,10 +652,23 @@ function mobileToggleSidebar() {
     var sidebar  = document.getElementById('sidebar');
     var overlay  = document.getElementById('sidebar-overlay');
     var isOpen   = sidebar.classList.contains('mobile-open');
+    if (!isOpen) {
+        // Forcer le mode plein (annuler slim) quand on ouvre sur mobile
+        sidebar.classList.remove('slim');
+        var logo = document.getElementById('topbar-logo');
+        if (logo) logo.classList.remove('slim');
+    }
     sidebar.classList.toggle('mobile-open', !isOpen);
     overlay.classList.toggle('active', !isOpen);
     document.body.style.overflow = isOpen ? '' : 'hidden';
 }
+// Sur mobile, s'assurer que le sidebar n'est jamais slim au chargement
+(function() {
+    if (window.innerWidth <= 768) {
+        var s = document.getElementById('sidebar');
+        if (s) s.classList.remove('slim');
+    }
+})();
 // Fermer le drawer quand on clique un lien nav sur mobile
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar .nav-item, .sidebar .nav-sub-item').forEach(function(el) {
