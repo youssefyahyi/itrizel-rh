@@ -189,6 +189,7 @@
     .mobile-brand  { display: none; }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
     .bottom-nav { display: none; }
+    .sidebar-mobile-header { display: none; }
 
     @media (max-width: 768px) {
 
@@ -221,19 +222,36 @@
             position: fixed !important;
             top: 0; left: 0; bottom: 0;
             z-index: 200;
-            width: 260px !important;
+            width: 280px !important;
             min-width: 0 !important;
             transform: translateX(-100%);
             transition: transform 0.25s ease;
             overflow-y: auto;
         }
         .sidebar.mobile-open { transform: translateX(0); }
-        .sidebar.slim { width: 260px !important; }
-        .sidebar.slim .nav-text { opacity: 1; width: auto; }
-        .sidebar.slim .nav-section { opacity: 1; height: auto; padding: 14px 18px 4px; }
-        .sidebar.slim .nav-item { justify-content: flex-start; padding: 9px 12px; }
-        .sidebar.slim .sidebar-user { justify-content: flex-start; padding: 12px 14px; }
-        .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block; }
+        /* Annuler le mode slim sur mobile */
+        .sidebar.slim { width: 280px !important; }
+        .sidebar.slim .nav-text { opacity: 1 !important; width: auto !important; }
+        .sidebar.slim .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; }
+        .sidebar.slim .nav-item { justify-content: flex-start !important; padding: 9px 12px !important; margin: 1px 8px !important; }
+        .sidebar.slim .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
+        .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block !important; }
+        /* Cacher le bouton collapse sur mobile */
+        .sidebar .nav-toggle { display: none; }
+        /* En-tête du drawer avec bouton fermer */
+        .sidebar-mobile-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 14px 10px;
+            border-bottom: 1px solid var(--sidebar-border);
+        }
+        .sidebar-mobile-header-brand { display: flex; align-items: center; gap: 8px; }
+        .sidebar-mobile-header-brand img { height: 28px; }
+        .sidebar-mobile-header-brand span { font-size: 16px; font-weight: 700; color: #fff; }
+        .sidebar-mobile-close {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            background: var(--sidebar-hover); border: none; border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.6); cursor: pointer;
+        }
         .sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
 
@@ -241,6 +259,9 @@
         .body { position: relative; }
         #admin-panel { display: none !important; }
         .content { padding-bottom: 64px; } /* espace pour la bottom nav */
+
+        /* Afficher l'en-tête du drawer */
+        .sidebar-mobile-header { display: flex; }
 
         /* ── Toolbar liste ── */
         .list-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
@@ -375,6 +396,18 @@
 
         {{-- SIDEBAR --}}
         <aside class="sidebar" id="sidebar">
+
+            {{-- En-tête drawer (visible uniquement sur mobile) --}}
+            <div class="sidebar-mobile-header">
+                <div class="sidebar-mobile-header-brand">
+                    <img src="{{ asset('images/itrizel-mark.png') }}" alt="Itrizel">
+                    <span>Itrizel RH</span>
+                </div>
+                <button class="sidebar-mobile-close" onclick="mobileToggleSidebar()" aria-label="Fermer">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
             <div class="sidebar-nav">
                 <div class="nav-toggle">
                     <button class="nav-toggle-btn" onclick="toggleNav()" title="Réduire / agrandir">
