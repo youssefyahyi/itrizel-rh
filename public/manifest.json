@@ -2,7 +2,7 @@
     "name": "Itrizel RH",
     "short_name": "Itrizel RH",
     "description": "Gestion des Ressources Humaines — Itrizel",
-    "start_url": "/dashboard",
+    "start_url": "/login",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#0F1923",
