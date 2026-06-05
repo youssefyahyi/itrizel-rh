@@ -229,18 +229,18 @@
             overflow-y: auto;
         }
         .sidebar.mobile-open { transform: translateX(0); }
-        /* Annuler le mode slim sur mobile — cibler les deux états */
-        .sidebar, .sidebar.slim { width: 280px !important; }
-        .sidebar .nav-text,
-        .sidebar.slim .nav-text { opacity: 1 !important; width: auto !important; overflow: visible !important; }
-        .sidebar .nav-section,
-        .sidebar.slim .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; margin: 0 !important; }
-        .sidebar .nav-item,
-        .sidebar.slim .nav-item { justify-content: flex-start !important; padding: 9px 12px !important; margin: 1px 8px !important; }
-        .sidebar .sidebar-user,
-        .sidebar.slim .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
-        .sidebar .u-info, .sidebar .u-logout,
-        .sidebar.slim .u-info, .sidebar.slim .u-logout { display: block !important; }
+        /* Annuler TOTALEMENT le mode slim — classe is-mobile sur body */
+        body.is-mobile .sidebar,
+        body.is-mobile .sidebar.slim { width: 280px !important; transform: translateX(-100%); }
+        body.is-mobile .sidebar.mobile-open,
+        body.is-mobile .sidebar.slim.mobile-open { transform: translateX(0) !important; }
+        body.is-mobile .sidebar *[class*="nav-text"],
+        body.is-mobile .sidebar .nav-text { opacity: 1 !important; width: auto !important; overflow: visible !important; display: block !important; }
+        body.is-mobile .sidebar .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; margin: 0 !important; }
+        body.is-mobile .sidebar .nav-item { justify-content: flex-start !important; padding: 9px 12px !important; margin: 1px 8px !important; }
+        body.is-mobile .sidebar .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
+        body.is-mobile .sidebar .u-info,
+        body.is-mobile .sidebar .u-logout { display: block !important; }
         /* Cacher le bouton collapse sur mobile */
         .sidebar .nav-toggle { display: none !important; }
         /* En-tête du drawer avec bouton fermer */
@@ -667,12 +667,20 @@ function mobileToggleSidebar() {
     overlay.classList.toggle('active', !isOpen);
     document.body.style.overflow = isOpen ? '' : 'hidden';
 }
-// Sur mobile, s'assurer que le sidebar n'est jamais slim au chargement
+// Appliquer is-mobile sur body + retirer slim dès le chargement
 (function() {
     if (window.innerWidth <= 768) {
+        document.body.classList.add('is-mobile');
         var s = document.getElementById('sidebar');
         if (s) s.classList.remove('slim');
     }
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            document.body.classList.add('is-mobile');
+        } else {
+            document.body.classList.remove('is-mobile');
+        }
+    });
 })();
 // Fermer le drawer quand on clique un lien nav sur mobile
 document.addEventListener('DOMContentLoaded', function() {

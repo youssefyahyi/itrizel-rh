@@ -1,4 +1,4 @@
-const CACHE = 'itrizel-rh-v1';
+const CACHE = 'itrizel-rh-v2';
 
 const PRECACHE = [
     '/',
