@@ -4,13 +4,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\ContratController;
-use App\Http\Controllers\PresenceController;
+use App\Http\Controllers\AbsenceController;
 use App\Http\Controllers\CongeController;
 use App\Http\Controllers\PaieController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ParametrageController;
+use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -28,7 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('personnel', PersonnelController::class)->parameters(['personnel' => 'employe']);
     Route::patch('personnel/{employe}/toggle-statut', [PersonnelController::class, 'toggleStatut'])->name('personnel.toggle-statut');
     Route::resource('contrats',    ContratController::class)->parameters(['contrats' => 'contrat']);
-    Route::resource('presences',   PresenceController::class)->parameters(['presences' => 'presence']);
+    Route::resource('absences',    AbsenceController::class)->parameters(['absences' => 'absence']);
     Route::resource('conges',      CongeController::class)->parameters(['conges' => 'conge']);
     Route::patch('conges/{conge}/approuver', [CongeController::class, 'approuver'])->name('conges.approuver');
     Route::patch('conges/{conge}/rejeter',   [CongeController::class, 'rejeter'])->name('conges.rejeter');
@@ -36,7 +37,18 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('evaluations', EvaluationController::class)->parameters(['evaluations' => 'evaluation']);
     Route::resource('formations',  FormationController::class)->parameters(['formations' => 'formation']);
     Route::resource('documents',   DocumentController::class);
-    Route::resource('parametrage', ParametrageController::class);
+
+    // Paramétrage
+    Route::prefix('parametrage')->name('parametrage.')->group(function () {
+        Route::get('/', [ParametrageController::class, 'index'])->name('index');
+
+        // Organisation
+        Route::get('organisation',          [OrganisationController::class, 'index'])->name('organisation.index');
+        Route::post('organisation',         [OrganisationController::class, 'store'])->name('organisation.store');
+        Route::get('organisation/{unite}',  [OrganisationController::class, 'show'])->name('organisation.show');
+        Route::put('organisation/{unite}',  [OrganisationController::class, 'update'])->name('organisation.update');
+        Route::delete('organisation/{unite}',[OrganisationController::class, 'destroy'])->name('organisation.destroy');
+    });
 
     // Profil
     Route::get('/profile',   [ProfileController::class, 'edit'])->name('profile.edit');

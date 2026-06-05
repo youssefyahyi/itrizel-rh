@@ -92,6 +92,12 @@
     .nav-item.active { background: var(--sidebar-active); color: #fff; font-weight: 500; }
     .nav-item.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:16px; background:var(--accent); border-radius:0 3px 3px 0; }
     .sidebar.slim .nav-item.active::before { left:0; }
+    .nav-chevron { margin-left:auto; transition: transform .15s; flex-shrink:0; }
+    .nav-chevron.rotate { transform: rotate(0deg); }
+    .nav-submenu { padding: 2px 0 4px 0; }
+    .nav-sub-item { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 36px; margin:1px 8px; border-radius:var(--radius-sm); color:rgba(255,255,255,0.45); font-size:12px; cursor:pointer; text-decoration:none; transition:all .15s; }
+    .nav-sub-item:hover { background:var(--sidebar-hover); color:rgba(255,255,255,0.85); }
+    .nav-sub-item.active { color:rgba(255,255,255,0.95); font-weight:500; background:rgba(255,255,255,0.08); }
     .sidebar.slim .nav-item { justify-content: center; padding: 9px 0; margin: 2px 8px; }
     .nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
     .nav-text { overflow: hidden; transition: opacity 0.15s; }
@@ -273,10 +279,10 @@
                     <span class="nav-text">Contrats</span>
                 </a>
 
-                <div class="nav-section">Présence & Temps</div>
-                <a href="{{ route('presences.index') }}" class="nav-item {{ request()->routeIs('presences.*') ? 'active' : '' }}" title="Présences">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="nav-text">Présences</span>
+                <div class="nav-section">Absences & Temps</div>
+                <a href="{{ route('absences.index') }}" class="nav-item {{ request()->routeIs('absences.*') ? 'active' : '' }}" title="Absences">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    <span class="nav-text">Absences</span>
                 </a>
                 <a href="{{ route('conges.index') }}" class="nav-item {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Congés">
                     <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -304,10 +310,23 @@
                     <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     <span class="nav-text">Documents</span>
                 </a>
-                <a href="{{ route('parametrage.index') }}" class="nav-item {{ request()->routeIs('parametrage.*') ? 'active' : '' }}" title="Paramétrage">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                    <span class="nav-text">Paramétrage</span>
-                </a>
+                {{-- Paramétrage avec sous-menu --}}
+                <div x-data="{ open: {{ request()->routeIs('parametrage.*') ? 'true' : 'false' }} }">
+                    <button type="button" @click="open = !open"
+                        class="nav-item nav-item-toggle {{ request()->routeIs('parametrage.*') ? 'active' : '' }}"
+                        title="Paramétrage" style="width:100%;border:none;background:none;text-align:left;cursor:pointer;">
+                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <span class="nav-text">Paramétrage</span>
+                        <svg class="nav-chevron" :class="open ? 'rotate' : ''" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="open" x-transition.duration.100ms class="nav-submenu">
+                        <a href="{{ route('parametrage.organisation.index') }}"
+                           class="nav-sub-item {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            Organisation
+                        </a>
+                    </div>
+                </div>
             </div>
 
         </aside>

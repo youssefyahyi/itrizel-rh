@@ -1,8 +1,8 @@
 <x-app-layout>
 <div style="display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid var(--border-light);background:var(--surface);">
-    <a href="{{ route('presences.index') }}" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Présences</a>
+    <a href="{{ route('absences.index') }}" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Absences</a>
     <span style="color:var(--text-muted);">›</span>
-    <span style="font-size:13px;color:var(--text-primary);font-weight:500;">{{ $presence->employe->nom_complet }} — {{ $presence->date->format('d/m/Y') }}</span>
+    <span style="font-size:13px;color:var(--text-primary);font-weight:500;">{{ $absence->employe->nom_complet }} — {{ $absence->date->format('d/m/Y') }}</span>
 </div>
 
 @if(session('success'))<div class="alert alert-success" style="margin:16px 24px 0;display:flex;align-items:center;gap:8px;"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ session('success') }}</div>@endif
@@ -11,15 +11,15 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-                <span class="badge {{ $presence->statut_badge }}"><span class="dot"></span>{{ $presence->statut_libelle }}</span>
+                <span class="badge {{ $absence->statut_badge }}"><span class="dot"></span>{{ $absence->statut_libelle }}</span>
             </div>
             <h1 style="font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">
-                <a href="{{ route('personnel.show', $presence->employe) }}" style="color:inherit;text-decoration:none;">{{ $presence->employe->nom_complet }}</a>
+                <a href="{{ route('personnel.show', $absence->employe) }}" style="color:inherit;text-decoration:none;">{{ $absence->employe->nom_complet }}</a>
             </h1>
-            <div style="font-size:13px;color:var(--text-muted);">{{ $presence->date->format('l d/m/Y') }} — {{ $presence->employe->poste }}</div>
+            <div style="font-size:13px;color:var(--text-muted);">{{ $absence->date->format('l d/m/Y') }} — {{ $absence->employe->poste }}</div>
         </div>
         <div style="display:flex;gap:8px;">
-            <a href="{{ route('presences.edit', $presence) }}" class="btn btn-outline btn-sm">Modifier</a>
+            <a href="{{ route('absences.edit', $absence) }}" class="btn btn-outline btn-sm">Modifier</a>
         </div>
     </div>
 </div>
@@ -32,17 +32,17 @@
         </div>
         <div class="tab-pane active" id="tab-infos">
             <div class="card">
-                <div class="card-header"><span class="card-title">Détail de présence</span></div>
+                <div class="card-header"><span class="card-title">Détail de l'absence</span></div>
                 <div style="padding:4px 20px;">
-                    <div class="info-row"><span class="info-label">Employé</span><span class="info-value"><a href="{{ route('personnel.show',$presence->employe) }}" class="link">{{ $presence->employe->nom_complet }}</a></span></div>
-                    <div class="info-row"><span class="info-label">Date</span><span class="info-value">{{ $presence->date->format('d/m/Y') }}</span></div>
-                    <div class="info-row"><span class="info-label">Statut</span><span class="info-value"><span class="badge {{ $presence->statut_badge }}">{{ $presence->statut_libelle }}</span></span></div>
-                    <div class="info-row"><span class="info-label">Heure d'arrivée</span><span class="info-value mono">{{ $presence->heure_arrivee ? \Carbon\Carbon::parse($presence->heure_arrivee)->format('H:i') : '—' }}</span></div>
-                    <div class="info-row"><span class="info-label">Heure de départ</span><span class="info-value mono">{{ $presence->heure_depart ? \Carbon\Carbon::parse($presence->heure_depart)->format('H:i') : '—' }}</span></div>
-                    <div class="info-row"><span class="info-label">Heures prévues</span><span class="info-value">{{ $presence->heures_prevues }}h</span></div>
-                    <div class="info-row"><span class="info-label">Heures réalisées</span><span class="info-value">{{ $presence->duree !== null ? number_format($presence->duree,1).'h' : '—' }}</span></div>
-                    @if($presence->motif_absence)<div class="info-row"><span class="info-label">Motif absence</span><span class="info-value">{{ $presence->motif_absence }}</span></div>@endif
-                    @if($presence->remarque)<div class="info-row"><span class="info-label">Remarque</span><span class="info-value">{{ $presence->remarque }}</span></div>@endif
+                    <div class="info-row"><span class="info-label">Employé</span><span class="info-value"><a href="{{ route('personnel.show',$absence->employe) }}" class="link">{{ $absence->employe->nom_complet }}</a></span></div>
+                    <div class="info-row"><span class="info-label">Date</span><span class="info-value">{{ $absence->date->format('d/m/Y') }}</span></div>
+                    <div class="info-row"><span class="info-label">Statut</span><span class="info-value"><span class="badge {{ $absence->statut_badge }}">{{ $absence->statut_libelle }}</span></span></div>
+                    <div class="info-row"><span class="info-label">Heure d'arrivée</span><span class="info-value mono">{{ $absence->heure_arrivee ? \Carbon\Carbon::parse($absence->heure_arrivee)->format('H:i') : '—' }}</span></div>
+                    <div class="info-row"><span class="info-label">Heure de départ</span><span class="info-value mono">{{ $absence->heure_depart ? \Carbon\Carbon::parse($absence->heure_depart)->format('H:i') : '—' }}</span></div>
+                    <div class="info-row"><span class="info-label">Heures prévues</span><span class="info-value">{{ $absence->heures_prevues }}h</span></div>
+                    <div class="info-row"><span class="info-label">Heures réalisées</span><span class="info-value">{{ $absence->duree !== null ? number_format($absence->duree,1).'h' : '—' }}</span></div>
+                    @if($absence->motif_absence)<div class="info-row"><span class="info-label">Motif absence</span><span class="info-value">{{ $absence->motif_absence }}</span></div>@endif
+                    @if($absence->remarque)<div class="info-row"><span class="info-label">Remarque</span><span class="info-value">{{ $absence->remarque }}</span></div>@endif
                 </div>
             </div>
         </div>
@@ -54,16 +54,16 @@
         <div class="card" style="padding:16px 20px;">
             <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Résumé</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Heures prévues</span><span style="font-weight:600;">{{ $presence->heures_prevues }}h</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Heures réalisées</span><span style="font-weight:600;color:{{ $presence->duree < $presence->heures_prevues ? 'var(--warning)' : 'var(--success)' }};">{{ $presence->duree !== null ? number_format($presence->duree,1).'h' : '—' }}</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Enregistré le</span><span>{{ $presence->created_at->format('d/m/Y') }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Heures prévues</span><span style="font-weight:600;">{{ $absence->heures_prevues }}h</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Heures réalisées</span><span style="font-weight:600;color:{{ $absence->duree < $absence->heures_prevues ? 'var(--warning)' : 'var(--success)' }};">{{ $absence->duree !== null ? number_format($absence->duree,1).'h' : '—' }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Enregistré le</span><span>{{ $absence->created_at->format('d/m/Y') }}</span></div>
             </div>
         </div>
         <div class="card" style="padding:16px;">
             <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Actions</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <a href="{{ route('presences.edit',$presence) }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">Modifier cette présence</a>
-                <form method="POST" action="{{ route('presences.destroy',$presence) }}" onsubmit="return confirm('Supprimer ?')">
+                <a href="{{ route('absences.edit',$absence) }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">Modifier cette absence</a>
+                <form method="POST" action="{{ route('absences.destroy',$absence) }}" onsubmit="return confirm('Supprimer ?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="tb-btn" style="width:100%;justify-content:flex-start;font-size:12px;color:var(--danger);">Supprimer</button>
                 </form>

@@ -1,33 +1,33 @@
-﻿<?php
+<?php
 namespace App\Http\Controllers;
-use App\Models\Presence;
+use App\Models\Absence;
 use App\Models\Employe;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
-class PresenceController extends Controller
+class AbsenceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Presence::with('employe')->latest('date');
+        $query = Absence::with('employe')->latest('date');
         if ($request->filled('q'))      $query->whereHas('employe', fn($e) => $e->where('nom','like',"%{$request->q}%")->orWhere('prenom','like',"%{$request->q}%"));
         if ($request->filled('statut')) $query->where('statut', $request->statut);
         if ($request->filled('mois'))   $query->whereMonth('date', $request->mois);
         if ($request->filled('annee'))  $query->whereYear('date', $request->annee);
-        $presences = $query->paginate(20)->withQueryString();
+        $absences = $query->paginate(20)->withQueryString();
         $today = now()->toDateString();
         $stats = [
-            'presents_today' => Presence::whereDate('date', $today)->where('statut','present')->count(),
-            'absents_today'  => Presence::whereDate('date', $today)->where('statut','absent')->count(),
-            'cette_semaine'  => Presence::whereBetween('date',[now()->startOfWeek(),now()->endOfWeek()])->count(),
-            'ce_mois'        => Presence::whereYear('date',now()->year)->whereMonth('date',now()->month)->count(),
+            'presents_today' => Absence::whereDate('date', $today)->where('statut','present')->count(),
+            'absents_today'  => Absence::whereDate('date', $today)->where('statut','absent')->count(),
+            'cette_semaine'  => Absence::whereBetween('date',[now()->startOfWeek(),now()->endOfWeek()])->count(),
+            'ce_mois'        => Absence::whereYear('date',now()->year)->whereMonth('date',now()->month)->count(),
         ];
-        return view('presences.index', compact('presences','stats'));
+        return view('absences.index', compact('absences','stats'));
     }
     public function create()
     {
         $employes = Employe::where('statut','actif')->orderBy('nom')->get();
-        return view('presences.form', ['presence' => new Presence, 'mode' => 'create', 'employes' => $employes]);
+        return view('absences.form', ['absence' => new Absence, 'mode' => 'create', 'employes' => $employes]);
     }
     public function store(Request $request)
     {
@@ -43,17 +43,17 @@ class PresenceController extends Controller
             'remarque'         => 'nullable|string',
         ]);
         $data['created_by'] = auth()->id();
-        $presence = Presence::create($data);
-        AuditLog::log('Presences','creation',"Presence du {$presence->date->format('d/m/Y')} - {$presence->employe->nom_complet}",$presence);
-        return redirect()->route('presences.show',$presence)->with('success','Presence enregistree.');
+        $absence = Absence::create($data);
+        AuditLog::log('Absences','creation',"Absence du {$absence->date->format('d/m/Y')} - {$absence->employe->nom_complet}",$absence);
+        return redirect()->route('absences.show',$absence)->with('success','Absence enregistrée.');
     }
-    public function show(Presence $presence) { $presence->load('employe'); return view('presences.show',compact('presence')); }
-    public function edit(Presence $presence)
+    public function show(Absence $absence) { $absence->load('employe'); return view('absences.show',compact('absence')); }
+    public function edit(Absence $absence)
     {
         $employes = Employe::where('statut','actif')->orderBy('nom')->get();
-        return view('presences.form',['presence'=>$presence,'mode'=>'edit','employes'=>$employes]);
+        return view('absences.form',['absence'=>$absence,'mode'=>'edit','employes'=>$employes]);
     }
-    public function update(Request $request, Presence $presence)
+    public function update(Request $request, Absence $absence)
     {
         $data = $request->validate([
             'statut'           => 'required|in:present,absent,conge,ferie,mission',
@@ -64,13 +64,13 @@ class PresenceController extends Controller
             'motif_absence'    => 'nullable|string|max:255',
             'remarque'         => 'nullable|string',
         ]);
-        $presence->update($data);
-        AuditLog::log('Presences','modification',"Presence du {$presence->date->format('d/m/Y')} modifiee",$presence);
-        return redirect()->route('presences.show',$presence)->with('success','Presence mise a jour.');
+        $absence->update($data);
+        AuditLog::log('Absences','modification',"Absence du {$absence->date->format('d/m/Y')} modifiée",$absence);
+        return redirect()->route('absences.show',$absence)->with('success','Absence mise à jour.');
     }
-    public function destroy(Presence $presence)
+    public function destroy(Absence $absence)
     {
-        $presence->delete();
-        return redirect()->route('presences.index')->with('success','Presence supprimee.');
+        $absence->delete();
+        return redirect()->route('absences.index')->with('success','Absence supprimée.');
     }
 }

@@ -4,8 +4,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Presence extends Model
+class Absence extends Model
 {
+    protected $table = 'absences';
+
     protected $fillable = [
         'employe_id','date','heure_arrivee','heure_depart',
         'heures_prevues','heures_realisees','statut',

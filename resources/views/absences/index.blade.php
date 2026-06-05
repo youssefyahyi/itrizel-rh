@@ -1,9 +1,9 @@
-﻿<x-app-layout>
+<x-app-layout>
 <div class="page-header">
-    <div class="page-title">Presences <span class="badge-count">{{ $stats['ce_mois'] }}</span></div>
-    <a href="{{ route('presences.create') }}" class="btn-new">
+    <div class="page-title">Absences <span class="badge-count">{{ $stats['ce_mois'] }}</span></div>
+    <a href="{{ route('absences.create') }}" class="btn-new">
         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-        Nouvelle presence
+        Nouvelle absence
     </a>
 </div>
 <div class="stats-row">
@@ -14,49 +14,49 @@
 </div>
 @if(session('success'))<div class="alert alert-success" style="margin:16px 24px 0;">{{ session('success') }}</div>@endif
 <div class="list-card">
-    <form method="GET" action="{{ route('presences.index') }}" id="f-pres">
+    <form method="GET" action="{{ route('absences.index') }}" id="f-abs">
         <input type="hidden" name="statut" id="f-statut" value="{{ request('statut') }}">
         <div class="list-toolbar">
-            <div class="search-box"><svg width="13" height="13" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><input type="text" name="q" value="{{ request('q') }}" placeholder="Employe..." onchange="this.form.submit()"></div>
+            <div class="search-box"><svg width="13" height="13" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><input type="text" name="q" value="{{ request('q') }}" placeholder="Employé..." onchange="this.form.submit()"></div>
             <div style="position:relative;">
-                <button type="button" class="tb-btn" onclick="gcmToggle('dd-pres-f',event)">Filtres</button>
-                <div id="dd-pres-f" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:170px;z-index:999;overflow:hidden;">
-                    @foreach(\App\Models\Presence::STATUTS as $v => $s)<div onclick="gcmSetFilter('statut','{{ $v }}')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:{{ request('statut')===$v ? 'var(--accent)' : 'var(--text-secondary)' }};">{{ $s['label'] }}</div>@endforeach
+                <button type="button" class="tb-btn" onclick="gcmToggle('dd-abs-f',event)">Filtres</button>
+                <div id="dd-abs-f" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:170px;z-index:999;overflow:hidden;">
+                    @foreach(\App\Models\Absence::STATUTS as $v => $s)<div onclick="gcmSetFilter('statut','{{ $v }}')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:{{ request('statut')===$v ? 'var(--accent)' : 'var(--text-secondary)' }};">{{ $s['label'] }}</div>@endforeach
                 </div>
             </div>
-            @if(request('statut'))<span class="chip">{{ \App\Models\Presence::STATUTS[request('statut')]['label'] ?? '' }} <button type="button" onclick="gcmRemoveFilter('statut')">x</button></span>@endif
+            @if(request('statut'))<span class="chip">{{ \App\Models\Absence::STATUTS[request('statut')]['label'] ?? '' }} <button type="button" onclick="gcmRemoveFilter('statut')">x</button></span>@endif
             <div class="tb-spacer"></div>
         </div>
     </form>
     <div class="table-wrap"><table>
         <thead><tr>
-            <th><span class="th-in">Employe</span></th>
+            <th><span class="th-in">Employé</span></th>
             <th><span class="th-in">Date</span></th>
-            <th><span class="th-in">Arrivee</span></th>
-            <th><span class="th-in">Depart</span></th>
+            <th><span class="th-in">Arrivée</span></th>
+            <th><span class="th-in">Départ</span></th>
             <th class="tc"><span class="th-in">Heures</span></th>
             <th class="tc"><span class="th-in">Statut</span></th>
             <th class="tc"></th>
         </tr></thead>
         <tbody>
-        @forelse($presences as $p)
+        @forelse($absences as $a)
         <tr>
-            <td><a href="{{ route('personnel.show', $p->employe) }}" class="link" style="font-weight:500;">{{ $p->employe->nom_complet }}</a></td>
-            <td class="muted">{{ $p->date->format('d/m/Y') }}</td>
-            <td class="mono">{{ $p->heure_arrivee ? \Carbon\Carbon::parse($p->heure_arrivee)->format('H:i') : '—' }}</td>
-            <td class="mono">{{ $p->heure_depart  ? \Carbon\Carbon::parse($p->heure_depart)->format('H:i') : '—' }}</td>
-            <td class="tc">{{ $p->duree !== null ? number_format($p->duree,1).'h' : '—' }}</td>
-            <td class="tc"><span class="badge {{ $p->statut_badge }}">{{ $p->statut_libelle }}</span></td>
+            <td><a href="{{ route('personnel.show', $a->employe) }}" class="link" style="font-weight:500;">{{ $a->employe->nom_complet }}</a></td>
+            <td class="muted">{{ $a->date->format('d/m/Y') }}</td>
+            <td class="mono">{{ $a->heure_arrivee ? \Carbon\Carbon::parse($a->heure_arrivee)->format('H:i') : '—' }}</td>
+            <td class="mono">{{ $a->heure_depart  ? \Carbon\Carbon::parse($a->heure_depart)->format('H:i') : '—' }}</td>
+            <td class="tc">{{ $a->duree !== null ? number_format($a->duree,1).'h' : '—' }}</td>
+            <td class="tc"><span class="badge {{ $a->statut_badge }}">{{ $a->statut_libelle }}</span></td>
             <td class="tc" style="white-space:nowrap;">
-                <a href="{{ route('presences.show',$p) }}" class="tb-btn" title="Voir"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
-                <a href="{{ route('presences.edit',$p) }}" class="tb-btn" title="Modifier"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
+                <a href="{{ route('absences.show',$a) }}" class="tb-btn" title="Voir"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
+                <a href="{{ route('absences.edit',$a) }}" class="tb-btn" title="Modifier"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
             </td>
         </tr>
-        @empty<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">Aucune presence.</td></tr>
+        @empty<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">Aucune absence enregistrée.</td></tr>
         @endforelse
         </tbody>
     </table></div>
-    <x-pagination :paginator="$presences" singular="presence" plural="presences" />
+    <x-pagination :paginator="$absences" singular="absence" plural="absences" />
 </div>
 <style>
 .page-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border);}
