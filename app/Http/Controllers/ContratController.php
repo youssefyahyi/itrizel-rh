@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Contrat;
 use App\Models\Employe;
 use App\Models\Poste;
+use App\Models\CategorieEmploye;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
@@ -42,8 +43,9 @@ class ContratController extends Controller
     public function create()
     {
         $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
-        $postes   = Poste::where('actif', true)->orderBy('numero')->get();
-        return view('contrats.form', ['contrat' => new Contrat, 'mode' => 'create', 'employes' => $employes, 'postes' => $postes]);
+        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
+        $categories = CategorieEmploye::actives();
+        return view('contrats.form', ['contrat' => new Contrat, 'mode' => 'create', 'employes' => $employes, 'postes' => $postes, 'categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -52,7 +54,7 @@ class ContratController extends Controller
             'employe_id'          => 'required|exists:employes,id',
             'type'                => 'required|in:CDD,CDI,interim,vacataire',
             'poste_id'            => 'nullable|exists:postes,id',
-            'categorie'           => 'required|in:commercial,chauffeur,magasinier,logisticien,administratif,cadre',
+            'categorie_id'        => 'nullable|exists:categories_employe,id',
             'salaire_base'        => 'required|numeric|min:0',
             'date_debut'          => 'required|date|after_or_equal:today',
             'date_fin'            => 'nullable|date|after:date_debut',
@@ -85,15 +87,16 @@ class ContratController extends Controller
     public function edit(Contrat $contrat)
     {
         $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
-        $postes   = Poste::where('actif', true)->orderBy('numero')->get();
-        return view('contrats.form', ['contrat' => $contrat, 'mode' => 'edit', 'employes' => $employes, 'postes' => $postes]);
+        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
+        $categories = CategorieEmploye::actives();
+        return view('contrats.form', ['contrat' => $contrat, 'mode' => 'edit', 'employes' => $employes, 'postes' => $postes, 'categories' => $categories]);
     }
 
     public function update(Request $request, Contrat $contrat)
     {
         $data = $request->validate([
             'poste_id'            => 'nullable|exists:postes,id',
-            'categorie'           => 'required|in:commercial,chauffeur,magasinier,logisticien,administratif,cadre',
+            'categorie_id'        => 'nullable|exists:categories_employe,id',
             'salaire_base'        => 'required|numeric|min:0',
             'date_debut'          => 'required|date',
             'date_fin'            => 'nullable|date|after:date_debut',

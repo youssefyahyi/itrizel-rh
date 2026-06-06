@@ -15,7 +15,7 @@ class StoreEmployeRequest extends FormRequest
             "cin"                => ["required","string","max:20","unique:employes,cin"],
             "date_naissance"     => ["required","date","before:today"],
             "sexe"               => ["required","in:M,F"],
-            "categorie"          => ["required","in:commercial,chauffeur,magasinier,logisticien,administratif,cadre"],
+            "categorie_id"       => ["nullable","exists:categories_employe,id"],
             "poste_id"           => ["nullable","exists:postes,id"],
             "date_embauche"      => ["required","date","before_or_equal:today"],
             "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],

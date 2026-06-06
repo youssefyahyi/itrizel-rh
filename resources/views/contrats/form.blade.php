@@ -55,11 +55,13 @@
         @endif
     </x-rh.form-field>
 
-    <x-rh.form-field label="Catégorie" name="categorie" :required="true">
-        <select name="categorie" class="form-control @error('categorie') is-invalid @enderror">
+    <x-rh.form-field label="Catégorie" name="categorie_id" :required="true">
+        <select name="categorie_id" class="form-control @error('categorie_id') is-invalid @enderror">
             <option value="">— Choisir —</option>
-            @foreach(\App\Models\Employe::CATEGORIES as $v => $l)
-            <option value="{{ $v }}" {{ old('categorie', $contrat->categorie) === $v ? 'selected' : '' }}>{{ $l }}</option>
+            @foreach($categories as $cat)
+            <option value="{{ $cat->id }}" {{ old('categorie_id', $contrat->categorie_id) == $cat->id ? 'selected' : '' }}>
+                {{ $cat->nom }}
+            </option>
             @endforeach
         </select>
     </x-rh.form-field>

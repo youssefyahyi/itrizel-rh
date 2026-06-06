@@ -13,6 +13,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ParametrageController;
 use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\PosteController;
+use App\Http\Controllers\CategorieEmployeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,13 @@ Route::middleware(['auth'])->group(function () {
         // Référentiel Postes
         Route::resource('postes', PosteController::class)->parameters(['postes' => 'poste']);
         Route::patch('postes/{poste}/toggle', [PosteController::class, 'toggle'])->name('postes.toggle');
+
+        // Référentiel Catégories
+        Route::get('categories',                  [CategorieEmployeController::class, 'index'])->name('categories.index');
+        Route::post('categories',                 [CategorieEmployeController::class, 'store'])->name('categories.store');
+        Route::put('categories/{category}',       [CategorieEmployeController::class, 'update'])->name('categories.update');
+        Route::delete('categories/{category}',    [CategorieEmployeController::class, 'destroy'])->name('categories.destroy');
+        Route::patch('categories/{category}/toggle', [CategorieEmployeController::class, 'toggle'])->name('categories.toggle');
 
         // Organisation
         Route::get('organisation',          [OrganisationController::class, 'index'])->name('organisation.index');

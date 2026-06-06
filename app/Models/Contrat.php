@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Contrat extends Model
 {
     protected $fillable = [
-        "employe_id","reference","type","poste","poste_id","categorie","salaire_base",
+        "employe_id","reference","type","poste","poste_id","categorie","categorie_id","salaire_base",
         "date_debut","date_fin","duree_mois","renouvellement_auto",
         "statut","motif_resiliation","observations","created_by",
     ];
@@ -81,7 +81,8 @@ class Contrat extends Model
     }
 
     // ── Relations ──────────────────────────────────────────────────
-    public function posteRef(): BelongsTo   { return $this->belongsTo(Poste::class, 'poste_id'); }
+    public function posteRef(): BelongsTo       { return $this->belongsTo(Poste::class, 'poste_id'); }
+    public function categorieRef(): BelongsTo   { return $this->belongsTo(CategorieEmploye::class, 'categorie_id'); }
     public function employe(): BelongsTo    { return $this->belongsTo(Employe::class); }
     public function createdBy(): BelongsTo  { return $this->belongsTo(User::class, "created_by"); }
 }
