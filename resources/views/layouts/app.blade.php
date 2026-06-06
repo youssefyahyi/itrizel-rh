@@ -109,6 +109,8 @@
     .nav-sub-item:hover { background:var(--sidebar-hover); color:rgba(255,255,255,0.85); }
     .nav-sub-item.active { color:rgba(255,255,255,0.95); font-weight:500; background:rgba(255,255,255,0.08); }
     .sidebar.slim .nav-item { justify-content: center; padding: 9px 0; margin: 2px 8px; }
+    .sidebar.slim .nav-submenu { display: none !important; }
+    .sidebar.slim .nav-chevron { display: none; }
     .nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
     .nav-text { overflow: hidden; transition: opacity 0.15s; }
     .sidebar.slim .nav-text { opacity: 0; width: 0; }
