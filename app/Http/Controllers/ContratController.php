@@ -52,11 +52,14 @@ class ContratController extends Controller
             'poste'               => 'required|string|max:150',
             'categorie'           => 'required|in:commercial,chauffeur,magasinier,logisticien,administratif,cadre',
             'salaire_base'        => 'required|numeric|min:0',
-            'date_debut'          => 'required|date',
+            'date_debut'          => 'required|date|after_or_equal:today',
             'date_fin'            => 'nullable|date|after:date_debut',
             'duree_mois'          => 'nullable|integer|min:1',
             'renouvellement_auto' => 'boolean',
             'observations'        => 'nullable|string',
+        ], [
+            'date_debut.after_or_equal' => 'La date de début du contrat ne peut pas être dans le passé.',
+            'date_fin.after'            => 'La date de fin doit être postérieure à la date de début.',
         ]);
 
         $data['reference']  = (new Contrat)->generateReference();

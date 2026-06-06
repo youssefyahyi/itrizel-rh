@@ -56,6 +56,7 @@
 <x-rh.form-section title="Dates & Rémunération">
     <x-rh.form-field label="Date de début" name="date_debut" :required="true">
         <input type="date" name="date_debut" class="form-control @error('date_debut') is-invalid @enderror"
+               @if($mode === 'create') min="{{ date('Y-m-d') }}" @endif
                value="{{ old('date_debut', $contrat->date_debut?->format('Y-m-d')) }}">
     </x-rh.form-field>
 
