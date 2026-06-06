@@ -4,15 +4,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CategorieEmploye extends Model
+class Fonction extends Model
 {
-    protected $table    = 'categories_employe';
+    protected $table    = 'fonctions';
     protected $fillable = ['nom', 'ordre', 'actif'];
     protected $casts    = ['actif' => 'boolean', 'ordre' => 'integer'];
 
     public function fiches(): HasMany
     {
-        return $this->hasMany(FichePoste::class, 'categorie_id');
+        return $this->hasMany(FichePoste::class, 'fonction_id');
     }
 
     public static function actives(): \Illuminate\Database\Eloquent\Collection

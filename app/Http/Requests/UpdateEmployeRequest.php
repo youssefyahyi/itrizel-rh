@@ -17,8 +17,6 @@ class UpdateEmployeRequest extends FormRequest
             "cin"                => ["required","string","max:20", Rule::unique("employes","cin")->ignore($id)],
             "date_naissance"     => ["required","date","before:today"],
             "sexe"               => ["required","in:M,F"],
-            "categorie_id"       => ["nullable","exists:categories_employe,id"],
-            "poste_id"           => ["nullable","exists:postes,id"],
             "date_embauche"      => ["required","date","before_or_equal:today"],
             "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],
             "nombre_enfants"     => ["required","integer","min:0","max:20"],
@@ -32,6 +30,7 @@ class UpdateEmployeRequest extends FormRequest
             "banque"             => ["nullable","string","max:100"],
             "numero_cnss"        => ["nullable","string","max:30"],
             "numero_amo"         => ["nullable","string","max:30"],
+            "fiche_poste_id"     => ["nullable","exists:fiches_poste,id"],
         ];
     }
 

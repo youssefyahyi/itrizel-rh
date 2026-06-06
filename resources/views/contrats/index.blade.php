@@ -89,10 +89,10 @@
             <td><span class="mono">{{ $c->reference }}</span></td>
             <td>
                 <a href="{{ route('personnel.show', $c->employe) }}" class="link" style="font-weight:500;">{{ $c->employe->nom_complet }}</a>
-                <div class="muted">{{ $c->employe->categorie_libelle }}</div>
+                <div class="muted">{{ $c->employe->fichePoste?->categorie->nom ?? '—' }}</div>
             </td>
             <td><span class="badge {{ $c->type === 'CDI' ? 'bg' : 'bb' }}">{{ $c->type }}</span></td>
-            <td style="color:var(--text-primary);">{{ $c->poste }}</td>
+            <td style="color:var(--text-primary);">{{ $c->fichePoste?->poste->nom ?? '—' }}</td>
             <td class="muted">{{ $c->date_debut->format('d/m/Y') }}</td>
             <td>
                 @if($c->date_fin)

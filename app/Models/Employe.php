@@ -13,7 +13,7 @@ class Employe extends Model
     protected $fillable = [
         "matricule","nom","prenom","cin","date_naissance","lieu_naissance",
         "nationalite","sexe","email","telephone","adresse","ville","photo",
-        "diplome","specialite","categorie","categorie_id","poste","poste_id","date_embauche",
+        "diplome","specialite","fiche_poste_id","date_embauche",
         "rib","banque","numero_cnss","numero_amo","nombre_enfants",
         "situation_familiale","statut","created_by",
         "manager_id","unite_id",
@@ -30,20 +30,6 @@ class Employe extends Model
         return "{$this->nom} {$this->prenom}";
     }
 
-    public const CATEGORIES = [
-        "commercial"   => "Commercial",
-        "chauffeur"    => "Chauffeur",
-        "magasinier"   => "Magasinier",
-        "logisticien"  => "Logisticien",
-        "administratif"=> "Administratif",
-        "cadre"        => "Cadre",
-    ];
-
-    public function getCategorieLibelleAttribute(): string
-    {
-        return self::CATEGORIES[$this->categorie] ?? $this->categorie;
-    }
-
     public function getStatutBadgeAttribute(): string
     {
         return match($this->statut) {
@@ -56,30 +42,8 @@ class Employe extends Model
 
     // ── Scopes ─────────────────────────────────────────────────────
     public function scopeActifs($query)       { return $query->where("statut", "actif"); }
-    public function scopeParCategorie($query, string $cat) { return $query->where("categorie", $cat); }
-
-    // ── Accessor : nom du poste (référentiel ou texte legacy) ──────
-    public function getPosteNomAttribute(): string
-    {
-        return $this->posteRef?->nom ?? $this->poste ?? '—';
-    }
 
     // ── Relations ──────────────────────────────────────────────────
-    public function getCategorieNomAttribute(): string
-    {
-        return $this->categorieRef?->nom ?? (self::CATEGORIES[$this->categorie] ?? $this->categorie ?? '—');
-    }
-
-    public function posteRef(): BelongsTo
-    {
-        return $this->belongsTo(Poste::class, 'poste_id');
-    }
-
-    public function categorieRef(): BelongsTo
-    {
-        return $this->belongsTo(CategorieEmploye::class, 'categorie_id');
-    }
-
     public function contrats(): HasMany         { return $this->hasMany(Contrat::class); }
     public function contratActif()              { return $this->hasOne(Contrat::class)->where("statut","en_cours")->latest(); }
     public function absences(): HasMany         { return $this->hasMany(Absence::class); }
@@ -89,6 +53,7 @@ class Employe extends Model
     public function formations(): HasMany       { return $this->hasMany(Formation::class); }
     public function documents(): HasMany        { return $this->hasMany(DocumentRh::class); }
     public function createdBy(): BelongsTo      { return $this->belongsTo(User::class, "created_by"); }
+    public function fichePoste(): BelongsTo     { return $this->belongsTo(FichePoste::class, 'fiche_poste_id'); }
 
     // ── Relations hiérarchie & organisation ────────────────────────
     public function unite(): BelongsTo

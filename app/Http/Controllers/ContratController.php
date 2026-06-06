@@ -3,16 +3,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Contrat;
 use App\Models\Employe;
-use App\Models\Poste;
-use App\Models\CategorieEmploye;
 use App\Models\AuditLog;
+use App\Models\FichePoste;
+use App\Models\CategorieEmploye;
 use Illuminate\Http\Request;
 
 class ContratController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Contrat::with('employe')->latest();
+        $query = Contrat::with(['employe.fichePoste', 'fichePoste.poste'])->latest();
 
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
@@ -43,9 +43,9 @@ class ContratController extends Controller
     public function create()
     {
         $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
-        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
-        $categories = CategorieEmploye::actives();
-        return view('contrats.form', ['contrat' => new Contrat, 'mode' => 'create', 'employes' => $employes, 'postes' => $postes, 'categories' => $categories]);
+        [$fiches, $categories] = $this->ficheData();
+        return view('contrats.form', ['contrat' => new Contrat, 'mode' => 'create',
+            'employes' => $employes, 'fiches' => $fiches, 'categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -53,8 +53,7 @@ class ContratController extends Controller
         $data = $request->validate([
             'employe_id'          => 'required|exists:employes,id',
             'type'                => 'required|in:CDD,CDI,interim,vacataire',
-            'poste_id'            => 'nullable|exists:postes,id',
-            'categorie_id'        => 'nullable|exists:categories_employe,id',
+            'fiche_poste_id'      => 'nullable|exists:fiches_poste,id',
             'salaire_base'        => 'required|numeric|min:0',
             'date_debut'          => 'required|date|after_or_equal:today',
             'date_fin'            => 'nullable|date|after:date_debut',
@@ -80,23 +79,22 @@ class ContratController extends Controller
 
     public function show(Contrat $contrat)
     {
-        $contrat->load('employe');
+        $contrat->load(['employe.fichePoste', 'fichePoste']);
         return view('contrats.show', compact('contrat'));
     }
 
     public function edit(Contrat $contrat)
     {
         $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
-        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
-        $categories = CategorieEmploye::actives();
-        return view('contrats.form', ['contrat' => $contrat, 'mode' => 'edit', 'employes' => $employes, 'postes' => $postes, 'categories' => $categories]);
+        [$fiches, $categories] = $this->ficheData();
+        return view('contrats.form', ['contrat' => $contrat, 'mode' => 'edit',
+            'employes' => $employes, 'fiches' => $fiches, 'categories' => $categories]);
     }
 
     public function update(Request $request, Contrat $contrat)
     {
         $data = $request->validate([
-            'poste_id'            => 'nullable|exists:postes,id',
-            'categorie_id'        => 'nullable|exists:categories_employe,id',
+            'fiche_poste_id'      => 'nullable|exists:fiches_poste,id',
             'salaire_base'        => 'required|numeric|min:0',
             'date_debut'          => 'required|date',
             'date_fin'            => 'nullable|date|after:date_debut',
@@ -113,6 +111,21 @@ class ContratController extends Controller
         AuditLog::log('Contrats', 'modification', "Contrat {$contrat->reference} modifié", $contrat);
 
         return redirect()->route('contrats.show', $contrat)->with('success', 'Contrat mis à jour.');
+    }
+
+    // ── Référentiel des emplois ────────────────────────────────────
+    private function ficheData(): array
+    {
+        $fiches = FichePoste::with(['categorie','fonction','poste'])
+            ->where('actif', true)
+            ->get()
+            ->sortBy([
+                fn($f) => $f->categorie?->ordre ?? 99,
+                fn($f) => $f->fonction?->nom,
+                fn($f) => $f->poste?->nom,
+            ]);
+        $categories = CategorieEmploye::where('actif', true)->orderBy('ordre')->get();
+        return [$fiches, $categories];
     }
 
     public function destroy(Contrat $contrat)

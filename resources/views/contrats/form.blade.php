@@ -38,32 +38,27 @@
         </select>
     </x-rh.form-field>
 
-    <x-rh.form-field label="Poste" name="poste_id" :required="true">
-        <select name="poste_id" class="form-control @error('poste_id') is-invalid @enderror">
-            <option value="">— Sélectionner un poste —</option>
-            @foreach($postes as $p)
-            <option value="{{ $p->id }}" {{ old('poste_id', $contrat->poste_id) == $p->id ? 'selected' : '' }}>
-                {{ $p->numero }} — {{ $p->nom }}
-            </option>
-            @endforeach
-        </select>
-        @if($postes->isEmpty())
-        <div class="form-hint" style="color:var(--warning,#d97706);">
-            ⚠️ Aucun poste actif —
-            <a href="{{ route('parametrage.postes.create') }}" target="_blank">Créer le référentiel</a>
-        </div>
-        @endif
-    </x-rh.form-field>
-
-    <x-rh.form-field label="Catégorie" name="categorie_id" :required="true">
-        <select name="categorie_id" class="form-control @error('categorie_id') is-invalid @enderror">
-            <option value="">— Choisir —</option>
+    <x-rh.form-field label="Fiche de poste" name="fiche_poste_id" :full="true">
+        @php $fichesByCat = $fiches->groupBy('categorie_id'); @endphp
+        <select name="fiche_poste_id" class="form-control @error('fiche_poste_id') is-invalid @enderror">
+            <option value="">— Sélectionner dans le référentiel des emplois —</option>
             @foreach($categories as $cat)
-            <option value="{{ $cat->id }}" {{ old('categorie_id', $contrat->categorie_id) == $cat->id ? 'selected' : '' }}>
-                {{ $cat->nom }}
-            </option>
+                @if($fichesByCat->has($cat->id))
+                <optgroup label="{{ $cat->nom }}">
+                    @foreach($fichesByCat[$cat->id] as $fiche)
+                    <option value="{{ $fiche->id }}"
+                        {{ old('fiche_poste_id', $contrat->fiche_poste_id) == $fiche->id ? 'selected' : '' }}>
+                        {{ $fiche->fonction->nom }} › {{ $fiche->poste->nom }}
+                    </option>
+                    @endforeach
+                </optgroup>
+                @endif
             @endforeach
         </select>
+        <div class="form-hint">
+            Référentiel géré dans
+            <a href="{{ route('parametrage.emplois.index') }}" target="_blank" style="color:var(--accent);">Paramétrage › Référentiel des emplois</a>.
+        </div>
     </x-rh.form-field>
 </x-rh.form-section>
 

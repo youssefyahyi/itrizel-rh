@@ -9,32 +9,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('employes', function (Blueprint $table) {
-            $table->foreignId('poste_id')
-                  ->nullable()
-                  ->after('poste')
-                  ->constrained('postes')
-                  ->nullOnDelete();
+            $table->dropColumn(['poste', 'categorie']);
         });
 
         Schema::table('contrats', function (Blueprint $table) {
-            $table->foreignId('poste_id')
-                  ->nullable()
-                  ->after('poste')
-                  ->constrained('postes')
-                  ->nullOnDelete();
+            $table->dropColumn(['poste', 'categorie']);
         });
     }
 
     public function down(): void
     {
         Schema::table('employes', function (Blueprint $table) {
-            $table->dropForeign(['poste_id']);
-            $table->dropColumn('poste_id');
+            $table->string('categorie', 50)->nullable()->after('specialite');
+            $table->string('poste', 100)->nullable()->after('categorie');
         });
 
         Schema::table('contrats', function (Blueprint $table) {
-            $table->dropForeign(['poste_id']);
-            $table->dropColumn('poste_id');
+            $table->string('categorie', 50)->nullable()->after('type');
+            $table->string('poste', 100)->nullable()->after('categorie');
         });
     }
 };

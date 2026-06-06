@@ -15,8 +15,6 @@ class StoreEmployeRequest extends FormRequest
             "cin"                => ["required","string","max:20","unique:employes,cin"],
             "date_naissance"     => ["required","date","before:today"],
             "sexe"               => ["required","in:M,F"],
-            "categorie_id"       => ["nullable","exists:categories_employe,id"],
-            "poste_id"           => ["nullable","exists:postes,id"],
             "date_embauche"      => ["required","date","before_or_equal:today"],
             "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],
             "nombre_enfants"     => ["required","integer","min:0","max:20"],
@@ -31,6 +29,7 @@ class StoreEmployeRequest extends FormRequest
             "numero_cnss"        => ["nullable","string","max:30"],
             "numero_amo"         => ["nullable","string","max:30"],
             "photo"              => ["nullable","image","max:2048"],
+            "fiche_poste_id"     => ["nullable","exists:fiches_poste,id"],
         ];
     }
 

@@ -2,9 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employe;
-use App\Models\Poste;
-use App\Models\CategorieEmploye;
 use App\Models\AuditLog;
+use App\Models\FichePoste;
+use App\Models\CategorieEmploye;
 use App\Http\Requests\StoreEmployeRequest;
 use App\Http\Requests\UpdateEmployeRequest;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class PersonnelController extends Controller
     // ── Liste ──────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $query = Employe::with("contratActif")->orderBy("nom");
+        $query = Employe::with(["contratActif", "fichePoste"])->orderBy("nom");
 
         if ($request->filled("q")) {
             $query->where(function ($q) use ($request) {
@@ -24,10 +24,6 @@ class PersonnelController extends Controller
                   ->orWhere("matricule", "like", "%{$request->q}%")
                   ->orWhere("cin", "like", "%{$request->q}%");
             });
-        }
-
-        if ($request->filled("categorie")) {
-            $query->where("categorie", $request->categorie);
         }
 
         if ($request->filled("statut")) {
@@ -46,15 +42,17 @@ class PersonnelController extends Controller
                           )->count(),
         ];
 
-        return view("personnel.index", compact("employes", "stats"));
+        [$fiches, $categories] = $this->ficheData();
+
+        return view("personnel.index", compact("employes", "stats", "fiches", "categories"));
     }
 
     // ── Formulaire création ────────────────────────────────────────
     public function create()
     {
-        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
-        $categories = CategorieEmploye::actives();
-        return view("personnel.form", ["employe" => new Employe, "mode" => "create", "postes" => $postes, "categories" => $categories]);
+        [$fiches, $categories] = $this->ficheData();
+        return view("personnel.form", ["employe" => new Employe, "mode" => "create",
+            "fiches" => $fiches, "categories" => $categories]);
     }
 
     // ── Enregistrement ─────────────────────────────────────────────
@@ -81,6 +79,7 @@ class PersonnelController extends Controller
     public function show(Employe $employe)
     {
         $employe->load([
+            "fichePoste",
             "contrats"      => fn($q) => $q->latest(),
             "conges"        => fn($q) => $q->latest()->limit(5),
             "bulletinsPaie" => fn($q) => $q->latest()->limit(5),
@@ -94,9 +93,9 @@ class PersonnelController extends Controller
     // ── Formulaire édition ─────────────────────────────────────────
     public function edit(Employe $employe)
     {
-        $postes     = Poste::where('actif', true)->orderBy('numero')->get();
-        $categories = CategorieEmploye::actives();
-        return view("personnel.form", ["employe" => $employe, "mode" => "edit", "postes" => $postes, "categories" => $categories]);
+        [$fiches, $categories] = $this->ficheData();
+        return view("personnel.form", ["employe" => $employe, "mode" => "edit",
+            "fiches" => $fiches, "categories" => $categories]);
     }
 
     // ── Mise à jour ────────────────────────────────────────────────
@@ -137,6 +136,21 @@ class PersonnelController extends Controller
         AuditLog::log("Personnel", "statut", "Statut de {$employe->nom_complet} changé en {$statut}", $employe);
 
         return back()->with("success", "Statut mis à jour.");
+    }
+
+    // ── Référentiel des emplois ────────────────────────────────────
+    private function ficheData(): array
+    {
+        $fiches = FichePoste::with(['categorie','fonction','poste'])
+            ->where('actif', true)
+            ->get()
+            ->sortBy([
+                fn($f) => $f->categorie?->ordre ?? 99,
+                fn($f) => $f->fonction?->nom,
+                fn($f) => $f->poste?->nom,
+            ]);
+        $categories = CategorieEmploye::where('actif', true)->orderBy('ordre')->get();
+        return [$fiches, $categories];
     }
 
     // ── Génération du matricule ────────────────────────────────────

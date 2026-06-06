@@ -7,31 +7,31 @@
     <div class="param-grid">
 
         <a href="{{ route('parametrage.organisation.index') }}" class="param-card">
-            <div class="param-card-icon">🏢</div>
+            <div class="param-card-icon">&#127962;</div>
             <div>
                 <div class="param-card-title">Organisation</div>
                 <div class="param-card-desc">Organigramme, unités et hiérarchie</div>
             </div>
         </a>
 
-        <a href="{{ route('parametrage.postes.index') }}" class="param-card">
-            <div class="param-card-icon">💼</div>
+        <a href="{{ route('parametrage.emplois.index') }}" class="param-card">
+            <div class="param-card-icon">&#128193;</div>
             <div>
-                <div class="param-card-title">Référentiel Postes</div>
-                <div class="param-card-desc">Fonctions, compétences et grilles de postes</div>
+                <div class="param-card-title">Référentiel des emplois</div>
+                <div class="param-card-desc">Catégories, fonctions et fiches de poste</div>
             </div>
         </a>
 
         <div class="param-card param-card-disabled">
-            <div class="param-card-icon">⚙️</div>
+            <div class="param-card-icon">&#9881;&#65039;</div>
             <div>
                 <div class="param-card-title">Paramètres RH</div>
-                <div class="param-card-desc">Types congés, motifs absence, catégories — à venir</div>
+                <div class="param-card-desc">Types congés, motifs absence, barèmes — à venir</div>
             </div>
         </div>
 
         <div class="param-card param-card-disabled">
-            <div class="param-card-icon">💰</div>
+            <div class="param-card-icon">&#128176;</div>
             <div>
                 <div class="param-card-title">Grille de paie</div>
                 <div class="param-card-desc">Rubriques, cotisations, barèmes — à venir</div>

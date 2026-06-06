@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['nom','prenom','cin','categorie','poste','date_embauche']); @endphp
+@php $hasErrors = $errors->hasAny(['nom','prenom','cin','fiche_poste_id','date_embauche']); @endphp
 
 <div id="rh-emp-modal-overlay"
      style="display:{{ $hasErrors ? 'flex' : 'none' }};position:fixed;inset:0;background:rgba(15,25,35,0.50);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;z-index:1000;padding:80px 20px 20px;"
@@ -61,23 +61,24 @@
                     @error('date_embauche')<div style="font-size:11px;color:var(--danger);margin-top:3px;">{{ $message }}</div>@enderror
                 </div>
 
-                <div class="form-group">
-                    <label style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:5px;">Catégorie <span style="color:var(--danger);">*</span></label>
-                    <select name="categorie" style="height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;width:100%;cursor:pointer;">
-                        <option value="">— Choisir —</option>
-                        @foreach(\App\Models\Employe::CATEGORIES as $v => $l)
-                        <option value="{{ $v }}" {{ old('categorie') === $v ? 'selected' : '' }}>{{ $l }}</option>
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:5px;">Fiche de poste</label>
+                    @php $fichesByCatModal = $fiches->groupBy('categorie_id'); @endphp
+                    <select name="fiche_poste_id" style="height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;width:100%;cursor:pointer;">
+                        <option value="">— Sélectionner (optionnel) —</option>
+                        @foreach($categories as $cat)
+                            @if($fichesByCatModal->has($cat->id))
+                            <optgroup label="{{ $cat->nom }}">
+                                @foreach($fichesByCatModal[$cat->id] as $fiche)
+                                <option value="{{ $fiche->id }}" {{ old('fiche_poste_id') == $fiche->id ? 'selected' : '' }}>
+                                    {{ $fiche->fonction->nom }} › {{ $fiche->poste->nom }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
                         @endforeach
                     </select>
-                    @error('categorie')<div style="font-size:11px;color:var(--danger);margin-top:3px;">{{ $message }}</div>@enderror
-                </div>
-
-                <div class="form-group">
-                    <label style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:5px;">Poste / Fonction <span style="color:var(--danger);">*</span></label>
-                    <input type="text" name="poste" value="{{ old('poste') }}"
-                           style="height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;width:100%;"
-                           placeholder="Ex: Chauffeur livreur">
-                    @error('poste')<div style="font-size:11px;color:var(--danger);margin-top:3px;">{{ $message }}</div>@enderror
+                    @error('fiche_poste_id')<div style="font-size:11px;color:var(--danger);margin-top:3px;">{{ $message }}</div>@enderror
                 </div>
 
             </div>

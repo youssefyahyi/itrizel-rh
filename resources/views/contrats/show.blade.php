@@ -29,7 +29,7 @@
             <span class="badge {{ $contrat->statut_badge }}"><span class="dot"></span>{{ $contrat->statut_libelle }}</span>
             <span class="badge {{ $contrat->type === 'CDI' ? 'bg' : 'bb' }}">{{ $contrat->type }}</span>
         </div>
-        <div style="font-size:13px;color:var(--text-secondary);">{{ $contrat->poste }} — <a href="{{ route('personnel.show', $contrat->employe) }}" class="link">{{ $contrat->employe->nom_complet }}</a></div>
+        <div style="font-size:13px;color:var(--text-secondary);">{{ $contrat->fichePoste?->poste->nom ?? '—' }} — <a href="{{ route('personnel.show', $contrat->employe) }}" class="link">{{ $contrat->employe->nom_complet }}</a></div>
         <div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap;">
             <span class="hero-meta"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Du {{ $contrat->date_debut->format('d/m/Y') }} @if($contrat->date_fin) au {{ $contrat->date_fin->format('d/m/Y') }} @else (illimité) @endif</span>
             <span class="hero-meta"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg> {{ number_format($contrat->salaire_base, 0, ',', ' ') }} DH / mois</span>
@@ -43,8 +43,8 @@
         <div class="info-card-title">Détails du contrat</div>
         <x-rh.detail-row label="Référence"      :value="$contrat->reference" />
         <x-rh.detail-row label="Type"           :value="$contrat->type" />
-        <x-rh.detail-row label="Catégorie"      :value="\App\Models\Employe::CATEGORIES[$contrat->categorie] ?? $contrat->categorie" />
-        <x-rh.detail-row label="Poste"          :value="$contrat->poste" />
+        <x-rh.detail-row label="Catégorie"      :value="$contrat->fichePoste?->categorie->nom ?? '—'" />
+        <x-rh.detail-row label="Poste"          :value="$contrat->fichePoste?->poste->nom ?? '—'" />
         <x-rh.detail-row label="Date de début"  :value="$contrat->date_debut->format('d/m/Y')" />
         <x-rh.detail-row label="Date de fin"    :value="$contrat->date_fin?->format('d/m/Y') ?? 'CDI — Sans échéance'" />
         @if($contrat->duree_mois)<x-rh.detail-row label="Durée" :value="$contrat->duree_mois.' mois'" />@endif
@@ -55,7 +55,7 @@
         <div class="info-card-title">Employé</div>
         <x-rh.detail-row label="Nom complet"    :value="$contrat->employe->nom_complet" />
         <x-rh.detail-row label="Matricule"      :value="$contrat->employe->matricule" />
-        <x-rh.detail-row label="Catégorie"      :value="$contrat->employe->categorie_libelle" />
+        <x-rh.detail-row label="Catégorie"      :value="$contrat->employe->fichePoste?->categorie->nom ?? '—'" />
         <div style="padding:12px 0 0;">
             <a href="{{ route('personnel.show', $contrat->employe) }}" class="tb-btn">Voir la fiche employé</a>
         </div>

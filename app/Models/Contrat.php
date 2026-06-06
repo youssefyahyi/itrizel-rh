@@ -3,11 +3,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\FichePoste;
 
 class Contrat extends Model
 {
     protected $fillable = [
-        "employe_id","reference","type","poste","poste_id","categorie","categorie_id","salaire_base",
+        "employe_id","reference","type","fiche_poste_id","salaire_base",
         "date_debut","date_fin","duree_mois","renouvellement_auto",
         "statut","motif_resiliation","observations","created_by",
     ];
@@ -74,15 +75,8 @@ class Contrat extends Model
         return "CTR-{$annee}-" . str_pad($seq, 4, '0', STR_PAD_LEFT);
     }
 
-    // ── Accessor : nom du poste ────────────────────────────────────
-    public function getPosteNomAttribute(): string
-    {
-        return $this->posteRef?->nom ?? $this->poste ?? '—';
-    }
-
     // ── Relations ──────────────────────────────────────────────────
-    public function posteRef(): BelongsTo       { return $this->belongsTo(Poste::class, 'poste_id'); }
-    public function categorieRef(): BelongsTo   { return $this->belongsTo(CategorieEmploye::class, 'categorie_id'); }
     public function employe(): BelongsTo    { return $this->belongsTo(Employe::class); }
     public function createdBy(): BelongsTo  { return $this->belongsTo(User::class, "created_by"); }
+    public function fichePoste(): BelongsTo { return $this->belongsTo(FichePoste::class, 'fiche_poste_id'); }
 }

@@ -29,10 +29,10 @@
             <div style="flex:1;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">
                     <span class="badge {{ $employe->statut_badge }}"><span class="dot"></span>{{ ucfirst($employe->statut) }}</span>
-                    <span class="badge bb">{{ $employe->categorie_libelle }}</span>
+                    <span class="badge bb">{{ $employe->fichePoste?->categorie->nom ?? '—' }}</span>
                 </div>
                 <h1 style="font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">{{ $employe->nom_complet }}</h1>
-                <div style="font-size:13px;color:var(--text-muted);">{{ $employe->poste }} — <span class="mono" style="font-size:12px;">{{ $employe->matricule }}</span></div>
+                <div style="font-size:13px;color:var(--text-muted);">{{ $employe->fichePoste?->poste->nom ?? '—' }} — <span class="mono" style="font-size:12px;">{{ $employe->matricule }}</span></div>
             </div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0;">
@@ -109,15 +109,24 @@
             </div>
 
             <div class="card" style="margin-top:16px;">
-                <div class="card-header"><span class="card-title">Poste & Affectation</span></div>
+                <div class="card-header">
+                    <span class="card-title">Poste & Affectation</span>
+                    <a href="{{ route('personnel.edit', $employe) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Modifier</a>
+                </div>
                 <div style="padding:4px 20px;">
                     <div class="info-row">
-                        <span class="info-label">Catégorie</span>
-                        <span class="info-value inline-field" data-field="categorie" data-type="select" data-value="{{ $employe->categorie }}" data-options='@json(\App\Models\Employe::CATEGORIES)'>{{ $employe->categorie_libelle }}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Poste</span>
-                        <span class="info-value inline-field" data-field="poste" data-type="text">{{ $employe->poste }}</span>
+                        <span class="info-label">Fiche de poste</span>
+                        <span class="info-value">
+                            @if($employe->fichePoste)
+                                <span class="badge bb" style="font-size:11px;">{{ $employe->fichePoste->categorie->nom }}</span>
+                                <span style="color:var(--text-muted);margin:0 4px;">&#8250;</span>
+                                {{ $employe->fichePoste->fonction->nom }}
+                                <span style="color:var(--text-muted);margin:0 4px;">&#8250;</span>
+                                {{ $employe->fichePoste->poste->nom }}
+                            @else
+                                <span style="color:var(--text-muted);">Non défini — <a href="{{ route('personnel.edit', $employe) }}" style="color:var(--accent);">Affecter un poste</a></span>
+                            @endif
+                        </span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Date d'embauche</span>
@@ -426,8 +435,6 @@
         sexe:              "{{ $employe->sexe }}",
         situation_familiale: "{{ $employe->situation_familiale }}",
         nombre_enfants:    "{{ $employe->nombre_enfants }}",
-        categorie:         "{{ $employe->categorie }}",
-        poste:             "{{ addslashes($employe->poste) }}",
         date_embauche:     "{{ $employe->date_embauche->format('Y-m-d') }}",
         diplome:           "{{ addslashes($employe->diplome ?? '') }}",
         specialite:        "{{ addslashes($employe->specialite ?? '') }}",
@@ -564,9 +571,6 @@
             span.textContent = ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
         } else if (field === 'sexe') {
             span.textContent = value === 'M' ? 'Masculin' : 'Féminin';
-        } else if (field === 'categorie') {
-            var cats = @json(\App\Models\Employe::CATEGORIES);
-            span.textContent = cats[value] || value;
         } else if (field === 'situation_familiale') {
             var sf = {celibataire:'Célibataire',marie:'Marié(e)',divorce:'Divorcé(e)',veuf:'Veuf/Veuve'};
             span.textContent = sf[value] || value;

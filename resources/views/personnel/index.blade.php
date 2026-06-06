@@ -39,15 +39,14 @@
 {{-- LIST CARD --}}
 <div class="list-card">
     <form method="GET" action="{{ route('personnel.index') }}" id="rh-emp-form">
-        <input type="hidden" name="statut"    id="f-statut"    value="{{ request('statut') }}">
-        <input type="hidden" name="categorie" id="f-categorie" value="{{ request('categorie') }}">
+        <input type="hidden" name="statut" id="f-statut" value="{{ request('statut') }}">
         <div class="list-toolbar">
             <div class="search-box">
                 <svg width="13" height="13" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="Nom, prenom, matricule, CIN..." onchange="this.form.submit()">
             </div>
             <div style="width:1px;height:18px;background:var(--border);flex-shrink:0;"></div>
-            @php $ac = collect(['q','statut','categorie'])->filter(fn($k)=>request($k))->count(); @endphp
+            @php $ac = collect(['q','statut'])->filter(fn($k)=>request($k))->count(); @endphp
             <div style="position:relative;">
                 <button type="button" class="tb-btn {{ $ac ? 'active' : '' }}" onclick="gcmToggle('dd-emp-f', event)">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
@@ -60,18 +59,10 @@
                         @if(request('statut')===$v)<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@else<span style="width:12px;"></span>@endif {{ $l }}
                     </div>
                     @endforeach
-                    <div style="height:1px;background:var(--border-light);margin:4px 0;"></div>
-                    <div style="padding:4px 12px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Categorie</div>
-                    @foreach(\App\Models\Employe::CATEGORIES as $v => $l)
-                    <div onclick="gcmSetFilter('categorie','{{ $v }}')" style="padding:8px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;{{ request('categorie')===$v ? 'background:var(--accent-light);color:var(--accent);font-weight:600;' : 'color:var(--text-secondary);' }}">
-                        @if(request('categorie')===$v)<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@else<span style="width:12px;"></span>@endif {{ $l }}
-                    </div>
-                    @endforeach
                 </div>
             </div>
             @if(request('q'))<span class="chip">"{{ request('q') }}" <button type="button" onclick="gcmRemoveFilter('q')">x</button></span>@endif
             @if(request('statut'))<span class="chip">{{ ucfirst(request('statut')) }} <button type="button" onclick="gcmRemoveFilter('statut')">x</button></span>@endif
-            @if(request('categorie'))<span class="chip">{{ \App\Models\Employe::CATEGORIES[request('categorie')] ?? '' }} <button type="button" onclick="gcmRemoveFilter('categorie')">x</button></span>@endif
             <div class="tb-spacer"></div>
             <button type="button" class="tb-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -102,8 +93,8 @@
                 @if($emp->email)<div class="muted">{{ $emp->email }}</div>@endif
             </td>
             <td><span class="mono">{{ $emp->matricule }}</span></td>
-            <td><span class="badge bb">{{ $emp->categorie_libelle }}</span></td>
-            <td style="color:var(--text-primary);">{{ $emp->poste }}</td>
+            <td><span class="badge bb">{{ $emp->fichePoste?->categorie->nom ?? '—' }}</span></td>
+            <td style="color:var(--text-primary);">{{ $emp->fichePoste?->poste->nom ?? '—' }}</td>
             <td class="muted">{{ $emp->date_embauche->format('d/m/Y') }}</td>
             <td>
                 @if($emp->contratActif)

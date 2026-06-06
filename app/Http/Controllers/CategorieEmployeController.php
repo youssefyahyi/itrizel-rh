@@ -7,55 +7,54 @@ use Illuminate\Http\Request;
 
 class CategorieEmployeController extends Controller
 {
-    public function index()
-    {
-        $categories = CategorieEmploye::withCount('employes')->orderBy('ordre')->get();
-        return view('parametrage.categories.index', compact('categories'));
-    }
-
     public function store(Request $request)
     {
         $data = $request->validate([
             'nom'   => 'required|string|max:100|unique:categories_employe,nom',
-            'ordre' => 'required|integer|min:0',
-        ], ['nom.unique' => 'Cette catégorie existe déjà.']);
-
+            'ordre' => 'required|integer|min:0|max:99',
+        ], [
+            'nom.unique' => 'Cette catégorie existe déjà.',
+        ]);
         $data['actif'] = true;
         $cat = CategorieEmploye::create($data);
-        AuditLog::log('Catégories', 'creation', "Catégorie «{$cat->nom}» créée", $cat);
-
-        return back()->with('success', "Catégorie «{$cat->nom}» ajoutée.");
+        AuditLog::log('Emplois', 'creation', "Catégorie «{$cat->nom}» ajoutée", $cat);
+        return redirect()->route('parametrage.emplois.index', ['panel' => 'categories'])
+            ->with('success', "Catégorie «{$cat->nom}» ajoutée.");
     }
 
-    public function update(Request $request, CategorieEmploye $category)
+    public function update(Request $request, CategorieEmploye $categorie)
     {
         $data = $request->validate([
-            'nom'   => 'required|string|max:100|unique:categories_employe,nom,'.$category->id,
-            'ordre' => 'required|integer|min:0',
+            'nom'   => 'required|string|max:100|unique:categories_employe,nom,' . $categorie->id,
+            'ordre' => 'required|integer|min:0|max:99',
+        ], [
+            'nom.unique' => 'Cette catégorie existe déjà.',
         ]);
-
-        $category->update($data);
-        AuditLog::log('Catégories', 'modification', "Catégorie «{$category->nom}» modifiée", $category);
-
-        return back()->with('success', "Catégorie mise à jour.");
+        $categorie->update($data);
+        AuditLog::log('Emplois', 'modification', "Catégorie «{$categorie->nom}» modifiée", $categorie);
+        return redirect()->route('parametrage.emplois.index', ['panel' => 'categories'])
+            ->with('success', 'Catégorie mise à jour.');
     }
 
-    public function destroy(CategorieEmploye $category)
+    public function destroy(CategorieEmploye $categorie)
     {
-        $nb = $category->employes()->count();
+        $nb = $categorie->fiches()->count();
         if ($nb > 0) {
-            return back()->with('error', "Impossible : {$nb} employé(s) dans cette catégorie.");
+            return redirect()->route('parametrage.emplois.index', ['panel' => 'categories'])
+                ->with('error', "Impossible : {$nb} fiche(s) d'emploi liée(s) à cette catégorie.");
         }
-        $nom = $category->nom;
-        $category->delete();
-        AuditLog::log('Catégories', 'suppression', "Catégorie «{$nom}» supprimée", null);
-        return back()->with('success', "Catégorie «{$nom}» supprimée.");
+        $nom = $categorie->nom;
+        $categorie->delete();
+        AuditLog::log('Emplois', 'suppression', "Catégorie «{$nom}» supprimée", null);
+        return redirect()->route('parametrage.emplois.index', ['panel' => 'categories'])
+            ->with('success', "Catégorie «{$nom}» supprimée.");
     }
 
-    public function toggle(CategorieEmploye $category)
+    public function toggle(CategorieEmploye $categorie)
     {
-        $category->update(['actif' => !$category->actif]);
-        $etat = $category->fresh()->actif ? 'activée' : 'désactivée';
-        return back()->with('success', "Catégorie «{$category->nom}» {$etat}.");
+        $categorie->update(['actif' => !$categorie->actif]);
+        $etat = $categorie->fresh()->actif ? 'activée' : 'désactivée';
+        return redirect()->route('parametrage.emplois.index', ['panel' => 'categories'])
+            ->with('success', "Catégorie «{$categorie->nom}» {$etat}.");
     }
 }

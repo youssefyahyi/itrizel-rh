@@ -16,7 +16,7 @@
             <h1 style="font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">
                 <a href="{{ route('personnel.show', $absence->employe) }}" style="color:inherit;text-decoration:none;">{{ $absence->employe->nom_complet }}</a>
             </h1>
-            <div style="font-size:13px;color:var(--text-muted);">{{ $absence->date->format('l d/m/Y') }} — {{ $absence->employe->poste }}</div>
+            <div style="font-size:13px;color:var(--text-muted);">{{ $absence->date->format('l d/m/Y') }} — {{ $absence->employe->fichePoste?->poste->nom ?? '—' }}</div>
         </div>
         <div style="display:flex;gap:8px;">
             <a href="{{ route('absences.edit', $absence) }}" class="btn btn-outline btn-sm">Modifier</a>

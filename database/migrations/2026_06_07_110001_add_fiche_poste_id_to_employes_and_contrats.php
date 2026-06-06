@@ -9,18 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('employes', function (Blueprint $table) {
-            $table->foreignId('categorie_id')
+            $table->foreignId('fiche_poste_id')
                   ->nullable()
-                  ->after('categorie')
-                  ->constrained('categories_employe')
+                  ->after('poste')
+                  ->constrained('fiches_poste')
                   ->nullOnDelete();
         });
 
         Schema::table('contrats', function (Blueprint $table) {
-            $table->foreignId('categorie_id')
+            $table->foreignId('fiche_poste_id')
                   ->nullable()
-                  ->after('categorie')
-                  ->constrained('categories_employe')
+                  ->after('poste')
+                  ->constrained('fiches_poste')
                   ->nullOnDelete();
         });
     }
@@ -28,12 +28,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('employes', function (Blueprint $table) {
-            $table->dropForeign(['categorie_id']);
-            $table->dropColumn('categorie_id');
+            $table->dropForeign(['fiche_poste_id']);
+            $table->dropColumn('fiche_poste_id');
         });
         Schema::table('contrats', function (Blueprint $table) {
-            $table->dropForeign(['categorie_id']);
-            $table->dropColumn('categorie_id');
+            $table->dropForeign(['fiche_poste_id']);
+            $table->dropColumn('fiche_poste_id');
         });
     }
 };

@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <div class="related-name">{{ $c->employe->nom_complet ?? '—' }}</div>
-                    <div class="related-sub">{{ $c->type }} · {{ $c->poste }}</div>
+                    <div class="related-sub">{{ $c->type }} · {{ $c->fichePoste?->poste->nom ?? '—' }}</div>
                 </div>
             </div>
             <span style="font-size:11px;font-weight:600;color:#D97706;white-space:nowrap;">{{ \Carbon\Carbon::parse($c->date_fin)->format('d/m/Y') }}</span>
@@ -100,7 +100,7 @@
                 </div>
                 <div>
                     <div class="related-name">{{ $emp->nom_complet }}</div>
-                    <div class="related-sub">{{ $emp->poste }} · {{ $emp->categorie }}</div>
+                    <div class="related-sub">{{ $emp->fichePoste?->poste->nom ?? '—' }} · {{ $emp->fichePoste?->categorie->nom ?? '—' }}</div>
                 </div>
             </div>
             <span class="badge bg" style="font-size:10px;">Actif</span>
