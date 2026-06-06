@@ -1,12 +1,11 @@
 <x-app-layout>
-<x-rh.page-header
-    title="Référentiel Postes"
-    :breadcrumbs="['Paramétrage' => route('parametrage.index'), 'Postes' => null]">
+<div class="page-header">
+    <div class="page-title">Référentiel Postes <span class="badge-count">{{ $postes->total() }}</span></div>
     <a href="{{ route('parametrage.postes.create') }}" class="btn-new">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
         Nouveau poste
     </a>
-</x-rh.page-header>
+</div>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
 
@@ -120,6 +119,8 @@
 </div>
 
 <style>
+.btn-new{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;}
+.btn-new:hover{background:var(--accent-hover);}
 .tb-btn-sm { padding:4px 8px !important; }
 .tb-btn-danger { color:var(--danger) !important; border-color:var(--danger-light,#fecaca) !important; }
 .tb-btn-danger:hover { background:var(--danger-light,#fef2f2) !important; }
