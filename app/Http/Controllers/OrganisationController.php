@@ -8,13 +8,55 @@ use Illuminate\Http\Request;
 
 class OrganisationController extends Controller
 {
-    // Charge l'arbre complet (partagé par index + show)
-    private function arbre(): \Illuminate\Database\Eloquent\Collection
+    /**
+     * Charge TOUTES les unités en 1 seule requête SQL,
+     * puis construit l'arbre en mémoire PHP.
+     * Fonctionne pour n'importe quelle profondeur, 10 ou 1000 unités.
+     */
+    private function arbre(): \Illuminate\Support\Collection
     {
-        return UniteOrganisationnelle::with('enfants.enfants.enfants.enfants')
-            ->whereNull('parent_id')
-            ->orderBy('ordre')->orderBy('nom')
-            ->get();
+        // 1 requête : tout charger d'un coup avec le responsable
+        $toutes = UniteOrganisationnelle::with('responsable')
+            ->orderBy('ordre')
+            ->orderBy('nom')
+            ->get()
+            ->keyBy('id');
+
+        // Initialiser la collection enfants sur chaque unité
+        foreach ($toutes as $unite) {
+            $unite->setRelation('enfants', collect());
+        }
+
+        // Rattacher chaque unité à son parent en mémoire
+        $racines = collect();
+        foreach ($toutes as $unite) {
+            if ($unite->parent_id && $toutes->has($unite->parent_id)) {
+                $toutes[$unite->parent_id]->enfants->push($unite);
+            } else {
+                $racines->push($unite);
+            }
+        }
+
+        return $racines;
+    }
+
+    /**
+     * Retourne tous les IDs descendants d'une unité
+     * à partir d'une collection déjà chargée (0 requête supplémentaire).
+     */
+    private function tousDescendantsIds(int $uniteId, \Illuminate\Support\Collection $toutes): array
+    {
+        $ids = [];
+        $queue = [$uniteId];
+        while (!empty($queue)) {
+            $currentId = array_shift($queue);
+            $enfants = $toutes->where('parent_id', $currentId);
+            foreach ($enfants as $enfant) {
+                $ids[] = $enfant->id;
+                $queue[] = $enfant->id;
+            }
+        }
+        return $ids;
     }
 
     public function index(Request $request)
@@ -83,8 +125,11 @@ class OrganisationController extends Controller
         ]);
 
         // Anti-boucle : empêcher de rattacher à un de ses propres enfants
+        // Utilise tousDescendantsIds() qui ne fait 0 requête SQL (travail en mémoire)
         if (!empty($data['parent_id'])) {
-            if ($data['parent_id'] == $unite->id || $unite->tousEnfantsIds()->contains($data['parent_id'])) {
+            $toutes = UniteOrganisationnelle::select('id', 'parent_id')->get();
+            $descendants = $this->tousDescendantsIds($unite->id, $toutes);
+            if ($data['parent_id'] == $unite->id || in_array($data['parent_id'], $descendants)) {
                 return back()->withErrors(['parent_id' => 'Impossible de rattacher une entité à l\'un de ses descendants.'])->withInput();
             }
         }
