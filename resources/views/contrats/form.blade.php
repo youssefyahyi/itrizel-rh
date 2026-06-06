@@ -38,9 +38,21 @@
         </select>
     </x-rh.form-field>
 
-    <x-rh.form-field label="Poste" name="poste" :required="true">
-        <input type="text" name="poste" class="form-control @error('poste') is-invalid @enderror"
-               value="{{ old('poste', $contrat->poste) }}" placeholder="Poste occupé">
+    <x-rh.form-field label="Poste" name="poste_id" :required="true">
+        <select name="poste_id" class="form-control @error('poste_id') is-invalid @enderror">
+            <option value="">— Sélectionner un poste —</option>
+            @foreach($postes as $p)
+            <option value="{{ $p->id }}" {{ old('poste_id', $contrat->poste_id) == $p->id ? 'selected' : '' }}>
+                {{ $p->numero }} — {{ $p->nom }}
+            </option>
+            @endforeach
+        </select>
+        @if($postes->isEmpty())
+        <div class="form-hint" style="color:var(--warning,#d97706);">
+            ⚠️ Aucun poste actif —
+            <a href="{{ route('parametrage.postes.create') }}" target="_blank">Créer le référentiel</a>
+        </div>
+        @endif
     </x-rh.form-field>
 
     <x-rh.form-field label="Catégorie" name="categorie" :required="true">

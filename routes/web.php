@@ -12,6 +12,7 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ParametrageController;
 use App\Http\Controllers\OrganisationController;
+use App\Http\Controllers\PosteController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
     // Paramétrage
     Route::prefix('parametrage')->name('parametrage.')->group(function () {
         Route::get('/', [ParametrageController::class, 'index'])->name('index');
+
+        // Référentiel Postes
+        Route::resource('postes', PosteController::class)->parameters(['postes' => 'poste']);
+        Route::patch('postes/{poste}/toggle', [PosteController::class, 'toggle'])->name('postes.toggle');
 
         // Organisation
         Route::get('organisation',          [OrganisationController::class, 'index'])->name('organisation.index');

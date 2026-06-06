@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employe;
+use App\Models\Poste;
 use App\Models\AuditLog;
 use App\Http\Requests\StoreEmployeRequest;
 use App\Http\Requests\UpdateEmployeRequest;
@@ -50,7 +51,8 @@ class PersonnelController extends Controller
     // ── Formulaire création ────────────────────────────────────────
     public function create()
     {
-        return view("personnel.form", ["employe" => new Employe, "mode" => "create"]);
+        $postes = Poste::where('actif', true)->orderBy('numero')->get();
+        return view("personnel.form", ["employe" => new Employe, "mode" => "create", "postes" => $postes]);
     }
 
     // ── Enregistrement ─────────────────────────────────────────────
@@ -90,7 +92,8 @@ class PersonnelController extends Controller
     // ── Formulaire édition ─────────────────────────────────────────
     public function edit(Employe $employe)
     {
-        return view("personnel.form", ["employe" => $employe, "mode" => "edit"]);
+        $postes = Poste::where('actif', true)->orderBy('numero')->get();
+        return view("personnel.form", ["employe" => $employe, "mode" => "edit", "postes" => $postes]);
     }
 
     // ── Mise à jour ────────────────────────────────────────────────

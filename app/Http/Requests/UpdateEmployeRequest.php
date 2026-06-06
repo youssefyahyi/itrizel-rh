@@ -18,7 +18,7 @@ class UpdateEmployeRequest extends FormRequest
             "date_naissance"     => ["required","date","before:today"],
             "sexe"               => ["required","in:M,F"],
             "categorie"          => ["required","in:commercial,chauffeur,magasinier,logisticien,administratif,cadre"],
-            "poste"              => ["required","string","max:150"],
+            "poste_id"           => ["nullable","exists:postes,id"],
             "date_embauche"      => ["required","date","before_or_equal:today"],
             "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],
             "nombre_enfants"     => ["required","integer","min:0","max:20"],

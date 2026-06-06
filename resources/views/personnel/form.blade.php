@@ -77,9 +77,21 @@
             @endforeach
         </select>
     </x-rh.form-field>
-    <x-rh.form-field label="Poste / Fonction" name="poste" :required="true">
-        <input type="text" name="poste" class="form-control @error('poste') is-invalid @enderror"
-               value="{{ old('poste', $employe->poste) }}" placeholder="Ex: Responsable commercial">
+    <x-rh.form-field label="Poste / Fonction" name="poste_id" :required="true">
+        <select name="poste_id" class="form-control @error('poste_id') is-invalid @enderror">
+            <option value="">— Sélectionner un poste —</option>
+            @foreach($postes as $p)
+            <option value="{{ $p->id }}" {{ old('poste_id', $employe->poste_id) == $p->id ? 'selected' : '' }}>
+                {{ $p->numero }} — {{ $p->nom }}
+            </option>
+            @endforeach
+        </select>
+        @if($postes->isEmpty())
+        <div class="form-hint" style="color:var(--warning,#d97706);">
+            ⚠️ Aucun poste actif —
+            <a href="{{ route('parametrage.postes.create') }}" target="_blank">Créer le référentiel</a>
+        </div>
+        @endif
     </x-rh.form-field>
     <x-rh.form-field label="Date d'embauche" name="date_embauche" :required="true">
         <input type="date" name="date_embauche" class="form-control @error('date_embauche') is-invalid @enderror"

@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('postes', function (Blueprint $table) {
+            $table->id();
+            $table->string('numero', 20)->unique();          // P001, P002…
+            $table->string('nom', 150);
+            $table->json('competences')->nullable();          // ["Maîtrise Excel","..."]
+            $table->text('description')->nullable();
+            $table->boolean('actif')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('postes');
+    }
+};
