@@ -33,7 +33,7 @@ class AbsenceController extends Controller
     {
         $data = $request->validate([
             'employe_id'       => 'required|exists:employes,id',
-            'date'             => 'required|date',
+            'date'             => 'required|date|before_or_equal:today',
             'statut'           => 'required|in:present,absent,conge,ferie,mission',
             'heure_arrivee'    => 'nullable|date_format:H:i',
             'heure_depart'     => 'nullable|date_format:H:i',

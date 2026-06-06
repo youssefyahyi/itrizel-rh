@@ -37,6 +37,7 @@
     </x-rh.form-field>
     <x-rh.form-field label="Date de naissance" name="date_naissance" :required="true">
         <input type="date" name="date_naissance" class="form-control @error('date_naissance') is-invalid @enderror"
+               max="{{ date('Y-m-d') }}"
                value="{{ old('date_naissance', $employe->date_naissance?->format('Y-m-d')) }}">
     </x-rh.form-field>
     <x-rh.form-field label="Sexe" name="sexe" :required="true">
@@ -82,6 +83,7 @@
     </x-rh.form-field>
     <x-rh.form-field label="Date d'embauche" name="date_embauche" :required="true">
         <input type="date" name="date_embauche" class="form-control @error('date_embauche') is-invalid @enderror"
+               max="{{ date('Y-m-d') }}"
                value="{{ old('date_embauche', $employe->date_embauche?->format('Y-m-d')) }}">
     </x-rh.form-field>
     <x-rh.form-field label="Diplôme" name="diplome">

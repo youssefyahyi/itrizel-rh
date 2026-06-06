@@ -23,7 +23,8 @@
         </select>
     </x-rh.form-field>
     <x-rh.form-field label="Date" name="date" :required="true">
-        <input type="date" name="date" class="form-control @error('date') is-invalid @enderror" value="{{ old('date', date('Y-m-d')) }}">
+        <input type="date" name="date" class="form-control @error('date') is-invalid @enderror"
+               max="{{ date('Y-m-d') }}" value="{{ old('date', date('Y-m-d')) }}">
     </x-rh.form-field>
     @else
     <x-rh.form-field label="Employé" name="employe_id">

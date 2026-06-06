@@ -17,7 +17,7 @@ class StoreEmployeRequest extends FormRequest
             "sexe"               => ["required","in:M,F"],
             "categorie"          => ["required","in:commercial,chauffeur,magasinier,logisticien,administratif,cadre"],
             "poste"              => ["required","string","max:150"],
-            "date_embauche"      => ["required","date"],
+            "date_embauche"      => ["required","date","before_or_equal:today"],
             "situation_familiale"=> ["required","in:celibataire,marie,divorce,veuf"],
             "nombre_enfants"     => ["required","integer","min:0","max:20"],
             "email"              => ["nullable","email","unique:employes,email"],
@@ -37,8 +37,10 @@ class StoreEmployeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            "cin.unique"   => "Ce numéro de CIN est déjà enregistré.",
-            "email.unique" => "Cette adresse email est déjà utilisée.",
+            "cin.unique"                    => "Ce numéro de CIN est déjà enregistré.",
+            "email.unique"                  => "Cette adresse email est déjà utilisée.",
+            "date_naissance.before"         => "La date de naissance doit être dans le passé.",
+            "date_embauche.before_or_equal" => "La date d'embauche ne peut pas être dans le futur.",
         ];
     }
 }
