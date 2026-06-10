@@ -85,6 +85,12 @@
                             <span class="remun-label">Salaire de base</span>
                             <span class="remun-amount">{{ number_format($bulletin->salaire_base, 2, ',', ' ') }} DH</span>
                         </div>
+                        @if($bulletin->prime_anciennete > 0)
+                        <div class="remun-row">
+                            <span class="remun-label">Prime d'ancienneté</span>
+                            <span class="remun-amount">{{ number_format($bulletin->prime_anciennete, 2, ',', ' ') }} DH</span>
+                        </div>
+                        @endif
                         @if($bulletin->total_primes > 0)
                         <div class="remun-row">
                             <span class="remun-label">Primes et indemnités</span>
@@ -93,7 +99,7 @@
                         @endif
                         <div class="remun-row remun-subtotal">
                             <span>Salaire brut</span>
-                            <span>{{ number_format((float)$bulletin->salaire_base + (float)$bulletin->total_primes, 2, ',', ' ') }} DH</span>
+                            <span>{{ number_format($bulletin->brut, 2, ',', ' ') }} DH</span>
                         </div>
                     </div>
 
@@ -132,6 +138,35 @@
                         </div>
                     </div>
 
+                    <div style="height:1px;background:var(--border-light);"></div>
+
+                    {{-- CHARGES PATRONALES --}}
+                    <div style="padding:14px 0 10px;">
+                        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Charges patronales</div>
+                        <div class="remun-row">
+                            <span class="remun-label">CNSS — Part patronale</span>
+                            <span class="remun-amount">{{ number_format($bulletin->cnss_patronal, 2, ',', ' ') }} DH</span>
+                        </div>
+                        <div class="remun-row">
+                            <span class="remun-label">AMO — Part patronale</span>
+                            <span class="remun-amount">{{ number_format($bulletin->amo_patronal, 2, ',', ' ') }} DH</span>
+                        </div>
+                        @if($bulletin->cimr_patronal > 0)
+                        <div class="remun-row">
+                            <span class="remun-label">CIMR — Part patronale</span>
+                            <span class="remun-amount">{{ number_format($bulletin->cimr_patronal, 2, ',', ' ') }} DH</span>
+                        </div>
+                        @endif
+                        <div class="remun-row remun-subtotal">
+                            <span>Total charges patronales</span>
+                            <span>{{ number_format($bulletin->total_patronal, 2, ',', ' ') }} DH</span>
+                        </div>
+                        <div class="remun-row" style="margin-top:4px;">
+                            <span class="remun-label" style="font-weight:600;color:var(--text-primary);">Coût employeur total</span>
+                            <span class="remun-amount" style="font-weight:700;">{{ number_format($bulletin->cout_employeur, 2, ',', ' ') }} DH</span>
+                        </div>
+                    </div>
+
                     <div style="height:1px;background:var(--border);"></div>
 
                     {{-- NET --}}
@@ -162,7 +197,7 @@
                     @foreach($emp->bulletinsPaie->sortByDesc(fn($b) => $b->periode_annee * 100 + $b->periode_mois) as $bh)
                     <tr style="{{ $bh->id === $bulletin->id ? 'background:var(--accent-light);' : '' }}">
                         <td style="font-weight:{{ $bh->id === $bulletin->id ? '600' : '400' }};">{{ $bh->periode_libelle }}</td>
-                        <td class="tr muted">{{ number_format((float)$bh->salaire_base + (float)$bh->total_primes, 0, ',', ' ') }} DH</td>
+                        <td class="tr muted">{{ number_format($bh->brut, 0, ',', ' ') }} DH</td>
                         <td class="tr muted">{{ number_format($bh->total_cotisations, 0, ',', ' ') }} DH</td>
                         <td class="tr"><span class="amount" style="color:var(--accent);">{{ number_format($bh->net_a_payer, 0, ',', ' ') }} DH</span></td>
                         <td class="tc"><span class="badge {{ $bh->statut_badge }}"><span class="dot"></span>{{ $bh->statut_libelle }}</span></td>

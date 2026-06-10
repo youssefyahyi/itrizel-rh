@@ -167,6 +167,68 @@ class PaieController extends Controller
     }
 
     /**
+     * Bordereau de déclaration CNSS/AMO mensuel.
+     */
+    public function bordereau(Request $request)
+    {
+        $dernier = BulletinPaie::selectRaw('periode_mois, periode_annee')
+            ->orderByDesc('periode_annee')->orderByDesc('periode_mois')
+            ->first();
+
+        $mois  = (int) $request->get('mois',  $dernier?->periode_mois  ?? now()->month);
+        $annee = (int) $request->get('annee', $dernier?->periode_annee ?? now()->year);
+
+        $bulletins = BulletinPaie::with('employe')
+            ->where('periode_mois', $mois)
+            ->where('periode_annee', $annee)
+            ->join('employes', 'bulletins_paie.employe_id', '=', 'employes.id')
+            ->orderBy('employes.nom')
+            ->select('bulletins_paie.*')
+            ->get();
+
+        $societe      = ParametrageRh::getGroupe('societe');
+        $cnssPlafond  = ParametrageRh::getFloat('paie.cnss_plafond', 6000);
+        $moisNoms     = ["","Janvier","Février","Mars","Avril","Mai","Juin",
+                         "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+        $moisNom      = $moisNoms[$mois] ?? $mois;
+
+        return view('paie.bordereau', compact('bulletins','mois','annee','societe','cnssPlafond','moisNom','moisNoms'));
+    }
+
+    /**
+     * Déclaration Annuelle des Salaires (DAS) — DGI.
+     */
+    public function das(Request $request)
+    {
+        $annee = (int) $request->get('annee', now()->year);
+
+        $lignes = BulletinPaie::with('employe')
+            ->where('periode_annee', $annee)
+            ->whereIn('statut', ['valide', 'paye'])
+            ->get()
+            ->groupBy('employe_id')
+            ->map(function ($bulletins) {
+                $employe = $bulletins->first()->employe;
+                return (object) [
+                    'employe'             => $employe,
+                    'nb_mois'             => $bulletins->count(),
+                    'brut_annuel'         => $bulletins->sum(fn($b) => $b->brut),
+                    'prime_anc_annuelle'  => $bulletins->sum('prime_anciennete'),
+                    'ir_annuel'           => $bulletins->sum('ir_mensuel'),
+                    'net_imposable_annuel'=> $bulletins->sum('net_imposable'),
+                    'net_annuel'          => $bulletins->sum('net_a_payer'),
+                ];
+            })
+            ->sortBy(fn($l) => $l->employe->nom);
+
+        $societe   = ParametrageRh::getGroupe('societe');
+        $annees    = BulletinPaie::selectRaw('DISTINCT periode_annee')
+                        ->orderByDesc('periode_annee')->pluck('periode_annee');
+
+        return view('paie.das', compact('lignes','annee','societe','annees'));
+    }
+
+    /**
      * Retourne les taux actuels en JSON (utilisé par le formulaire JS).
      */
     public function taux()

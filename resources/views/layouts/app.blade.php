@@ -480,8 +480,10 @@
                     </a>
                     <div class="flyout">
                         <div class="flyout-title">Rémunération</div>
-                        <a href="{{ route('paie.index') }}" class="flyout-link {{ request()->routeIs('paie.*') && !request()->routeIs('paie.livre') ? 'active' : '' }}">Bulletins de paie</a>
+                        <a href="{{ route('paie.index') }}" class="flyout-link {{ request()->routeIs('paie.*') && !request()->routeIs('paie.livre') && !request()->routeIs('paie.bordereau') && !request()->routeIs('paie.das') ? 'active' : '' }}">Bulletins de paie</a>
                         <a href="{{ route('paie.livre') }}" class="flyout-link {{ request()->routeIs('paie.livre') ? 'active' : '' }}">Livre de paie</a>
+                        <a href="{{ route('paie.bordereau') }}" class="flyout-link {{ request()->routeIs('paie.bordereau') ? 'active' : '' }}">Bordereau CNSS/AMO</a>
+                        <a href="{{ route('paie.das') }}" class="flyout-link {{ request()->routeIs('paie.das') ? 'active' : '' }}">DAS</a>
                     </div>
                 </div>
 
