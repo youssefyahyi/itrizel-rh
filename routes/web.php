@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('conges',      CongeController::class)->parameters(['conges' => 'conge']);
     Route::patch('conges/{conge}/approuver', [CongeController::class, 'approuver'])->name('conges.approuver');
     Route::patch('conges/{conge}/rejeter',   [CongeController::class, 'rejeter'])->name('conges.rejeter');
+    Route::get('paie/livre',        [PaieController::class, 'livre'])->name('paie.livre');
     Route::resource('paie',        PaieController::class)->parameters(['paie' => 'paie']);
     Route::get('paie/{paie}/print', [PaieController::class, 'print'])->name('paie.print');
     Route::get('paie-taux',         [PaieController::class, 'taux'])->name('paie.taux');

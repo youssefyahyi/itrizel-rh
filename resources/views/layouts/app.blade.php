@@ -49,11 +49,9 @@
 
     /* ── Topbar ── */
     .topbar { height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-shrink: 0; z-index: 50; }
-    .topbar-logo { width: 220px; min-width: 220px; padding: 0 16px; display: flex; align-items: center; gap: 9px; height: 100%; flex-shrink: 0; background: var(--sidebar-bg); transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease; overflow: hidden; }
-    .topbar-logo.slim { width: 64px; min-width: 64px; padding: 0; justify-content: center; gap: 0; }
+    .topbar-logo { width: 60px; min-width: 60px; padding: 0; display: flex; align-items: center; justify-content: center; height: 100%; flex-shrink: 0; background: var(--sidebar-bg); }
     .topbar-logo img { height: 32px; width: auto; display: block; flex-shrink: 0; }
-    .logo-lockup { display: flex; flex-direction: column; line-height: 1; white-space: nowrap; transition: opacity 0.15s; }
-    .topbar-logo.slim .logo-lockup { opacity: 0; width: 0; overflow: hidden; }
+    .logo-lockup { display: none; }
     .logo-name { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
     .topbar-brand { display: flex; align-items: center; gap: 14px; padding: 0 18px; height: 100%; border-right: 1px solid var(--border); flex-shrink: 0; }
     .brand-product { display: flex; flex-direction: column; gap: 3px; }
@@ -87,37 +85,30 @@
     .tb-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .sep-v { width: 1px; height: 18px; background: var(--border); }
 
-    /* ── Sidebar ── */
-    .sidebar { width: 220px; background: var(--sidebar-bg); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.25s ease; overflow: hidden; }
-    .sidebar.slim { width: 64px; }
-    .sidebar-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 0; }
-    .nav-toggle { display: flex; justify-content: flex-end; padding: 6px 10px 2px; }
-    .sidebar.slim .nav-toggle { justify-content: center; }
-    .nav-toggle-btn { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; padding: 4px 6px; border-radius: 4px; display: flex; transition: all 0.15s; }
-    .nav-toggle-btn:hover { background: var(--sidebar-hover); color: rgba(255,255,255,0.8); }
-    .nav-section { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 14px 18px 4px; white-space: nowrap; overflow: hidden; transition: all 0.2s; }
-    .sidebar.slim .nav-section { opacity: 0; height: 0; padding: 0; margin: 0; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin: 1px 8px; border-radius: var(--radius-sm); color: rgba(255,255,255,0.55); font-size: 12.5px; cursor: pointer; white-space: nowrap; position: relative; transition: all 0.15s; text-decoration: none; }
-    .nav-item:hover  { background: var(--sidebar-hover); color: rgba(255,255,255,0.9); }
-    .nav-item.active { background: var(--sidebar-active); color: #fff; font-weight: 500; }
-    .nav-item.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:16px; background:var(--accent); border-radius:0 3px 3px 0; }
-    .sidebar.slim .nav-item.active::before { left:0; }
-    .nav-chevron { margin-left:auto; transition: transform .15s; flex-shrink:0; }
-    .nav-chevron.rotate { transform: rotate(0deg); }
-    .nav-submenu { padding: 2px 0 4px 0; }
-    .nav-sub-item { display:flex; align-items:center; gap:8px; padding:7px 12px 7px 36px; margin:1px 8px; border-radius:var(--radius-sm); color:rgba(255,255,255,0.45); font-size:12px; cursor:pointer; text-decoration:none; transition:all .15s; }
-    .nav-sub-item:hover { background:var(--sidebar-hover); color:rgba(255,255,255,0.85); }
-    .nav-sub-item.active { color:rgba(255,255,255,0.95); font-weight:500; background:rgba(255,255,255,0.08); }
-    .sidebar.slim .nav-item { justify-content: center; padding: 9px 0; margin: 2px 8px; }
-    .sidebar.slim .nav-submenu { display: none !important; }
-    .sidebar.slim .nav-chevron { display: none; }
-    .nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
-    .nav-text { overflow: hidden; transition: opacity 0.15s; }
-    .sidebar.slim .nav-text { opacity: 0; width: 0; }
-    .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--sidebar-border); flex-shrink: 0; overflow: hidden; }
-    .sidebar.slim .sidebar-user { justify-content: center; padding: 12px 0; }
-    .sidebar.slim .u-info, .sidebar.slim .u-logout { display: none; }
-    .u-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    /* ── Sidebar — HubSpot style : slim permanent + flyout au survol ── */
+    .sidebar { width: 60px; min-width: 60px; background: var(--sidebar-bg); display: flex; flex-direction: column; flex-shrink: 0; overflow: visible; position: relative; z-index: 100; }
+    .sidebar-nav { flex: 1; overflow: visible; padding: 8px 0; display: flex; flex-direction: column; }
+    .nav-sep { height: 1px; background: var(--sidebar-border); margin: 6px 12px; flex-shrink: 0; }
+    /* Groupe : wrapper icône + flyout */
+    .nav-group { position: relative; }
+    /* Bouton icône */
+    .nav-icon-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 40px; margin: 1px 8px; border-radius: var(--radius-sm); color: rgba(255,255,255,0.45); transition: all 0.15s; text-decoration: none; position: relative; flex-shrink: 0; }
+    .nav-icon-btn:hover { background: var(--sidebar-hover); color: rgba(255,255,255,0.9); }
+    .nav-icon-btn.active { background: var(--sidebar-active); color: #fff; }
+    .nav-icon-btn.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:16px; background:var(--accent); border-radius:0 3px 3px 0; }
+    .nav-icon-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .nav-text { display: none; }
+    /* Flyout panel */
+    .flyout { position: absolute; left: 60px; top: 0; min-width: 200px; background: var(--sidebar-bg); border: 1px solid rgba(255,255,255,0.07); border-left: none; border-radius: 0 var(--radius) var(--radius) 0; box-shadow: 4px 0 16px rgba(0,0,0,0.35); padding: 10px 0 8px; opacity: 0; visibility: hidden; transition: opacity 0.12s, visibility 0.12s; z-index: 500; pointer-events: none; }
+    .flyout::before { content:''; position:absolute; left:-8px; top:0; width:8px; height:100%; }
+    .nav-group:hover .flyout { opacity: 1; visibility: visible; pointer-events: auto; }
+    .flyout-title { padding: 6px 16px 8px; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; }
+    .flyout-link { display: flex; align-items: center; padding: 6px 16px; font-size: 12px; color: rgba(255,255,255,0.5); text-decoration: none; transition: background 0.1s, color 0.1s; white-space: nowrap; }
+    .flyout-link:hover { background: var(--sidebar-hover); color: rgba(255,255,255,0.9); }
+    .flyout-link.active { color: #fff; font-weight: 500; background: var(--sidebar-active); }
+    /* Utilisateur bas de sidebar */
+    .sidebar-user { display: flex; align-items: center; justify-content: center; padding: 12px 0; border-top: 1px solid var(--sidebar-border); flex-shrink: 0; }
+    .u-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: default; }
     .u-name { font-size: 12px; font-weight: 600; color: #fff; }
     .u-role { font-size: 10px; color: rgba(255,255,255,0.35); }
 
@@ -219,32 +210,29 @@
         .mobile-brand-text { font-size: 15px; font-weight: 700; color: var(--text-primary); }
         .mobile-brand-sub  { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; }
 
-        /* ── Sidebar drawer ── */
+        /* ── Sidebar drawer mobile ── */
         .sidebar {
             position: fixed !important;
             top: 0; left: 0; bottom: 0;
             z-index: 200;
-            width: 280px !important;
+            width: 270px !important;
             min-width: 0 !important;
             transform: translateX(-100%);
             transition: transform 0.25s ease;
             overflow-y: auto;
+            overflow-x: visible;
         }
         .sidebar.mobile-open { transform: translateX(0); }
-        /* Annuler TOTALEMENT le mode slim — classe is-mobile sur body */
-        body.is-mobile .sidebar,
-        body.is-mobile .sidebar.slim { width: 280px !important; transform: translateX(-100%); }
-        body.is-mobile .sidebar.mobile-open,
-        body.is-mobile .sidebar.slim.mobile-open { transform: translateX(0) !important; }
-        body.is-mobile .sidebar *[class*="nav-text"],
-        body.is-mobile .sidebar .nav-text { opacity: 1 !important; width: auto !important; overflow: visible !important; display: block !important; }
-        body.is-mobile .sidebar .nav-section { opacity: 1 !important; height: auto !important; padding: 14px 18px 4px !important; margin: 0 !important; }
-        body.is-mobile .sidebar .nav-item { justify-content: flex-start !important; padding: 9px 12px !important; margin: 1px 8px !important; }
-        body.is-mobile .sidebar .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; }
-        body.is-mobile .sidebar .u-info,
-        body.is-mobile .sidebar .u-logout { display: block !important; }
-        /* Cacher le bouton collapse sur mobile */
-        .sidebar .nav-toggle { display: none !important; }
+        /* Mode drawer : afficher les items en ligne avec texte */
+        body.is-mobile .sidebar { overflow-y: auto !important; }
+        body.is-mobile .sidebar.mobile-open { transform: translateX(0) !important; }
+        body.is-mobile .sidebar .nav-group { display: block; }
+        body.is-mobile .sidebar .nav-icon-btn { width: calc(100% - 16px) !important; height: auto !important; justify-content: flex-start !important; gap: 10px !important; padding: 9px 12px !important; margin: 1px 8px !important; }
+        body.is-mobile .sidebar .nav-text { display: inline !important; font-size: 12.5px; color: rgba(255,255,255,0.75); }
+        body.is-mobile .sidebar .flyout { display: none !important; }
+        body.is-mobile .sidebar .nav-sep { display: block; }
+        body.is-mobile .sidebar .sidebar-user { justify-content: flex-start !important; padding: 12px 14px !important; gap: 10px; }
+        body.is-mobile .sidebar .u-info { display: block !important; }
         /* En-tête du drawer avec bouton fermer */
         .sidebar-mobile-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -416,87 +404,149 @@
             </div>
 
             <div class="sidebar-nav">
-                <div class="nav-toggle">
-                    <button class="nav-toggle-btn" onclick="toggleNav()" title="Réduire / agrandir">
-                        <svg id="toggle-icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                        </svg>
-                    </button>
+
+                {{-- Dashboard --}}
+                <div class="nav-group">
+                    <a href="{{ route('dashboard') }}" class="nav-icon-btn {{ request()->routeIs('dashboard') ? 'active' : '' }}" title="Tableau de bord">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span class="nav-text">Tableau de bord</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Principal</div>
+                        <a href="{{ route('dashboard') }}" class="flyout-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Tableau de bord</a>
+                    </div>
                 </div>
 
-                <div class="nav-section">Principal</div>
-                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" title="Tableau de bord">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span class="nav-text">Tableau de bord</span>
-                </a>
+                <div class="nav-sep"></div>
 
-                <div class="nav-section">Personnel</div>
-                <a href="{{ route('personnel.index') }}" class="nav-item {{ request()->routeIs('personnel.*') ? 'active' : '' }}" title="Personnel">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="nav-text">Personnel</span>
-                </a>
-                <a href="{{ route('contrats.index') }}" class="nav-item {{ request()->routeIs('contrats.*') ? 'active' : '' }}" title="Contrats">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span class="nav-text">Contrats</span>
-                </a>
-
-                <div class="nav-section">Absences & Temps</div>
-                <a href="{{ route('absences.index') }}" class="nav-item {{ request()->routeIs('absences.*') ? 'active' : '' }}" title="Absences">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                    <span class="nav-text">Absences</span>
-                </a>
-                <a href="{{ route('conges.index') }}" class="nav-item {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Congés">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span class="nav-text">Congés</span>
-                </a>
-
-                <div class="nav-section">Rémunération</div>
-                <a href="{{ route('paie.index') }}" class="nav-item {{ request()->routeIs('paie.*') ? 'active' : '' }}" title="Paie">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span class="nav-text">Paie</span>
-                </a>
-
-                <div class="nav-section">Développement</div>
-                <a href="{{ route('evaluations.index') }}" class="nav-item {{ request()->routeIs('evaluations.*') ? 'active' : '' }}" title="Évaluations">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span class="nav-text">Évaluations</span>
-                </a>
-                <a href="{{ route('formations.index') }}" class="nav-item {{ request()->routeIs('formations.*') ? 'active' : '' }}" title="Formations">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    <span class="nav-text">Formations</span>
-                </a>
-
-                <div class="nav-section">Documents</div>
-                <a href="{{ route('documents.index') }}" class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" title="Documents">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    <span class="nav-text">Documents</span>
-                </a>
-                {{-- Paramétrage avec sous-menu --}}
-                <div x-data="{ open: {{ request()->routeIs('parametrage.*') ? 'true' : 'false' }} }">
-                    <button type="button" @click="open = !open"
-                        class="nav-item nav-item-toggle {{ request()->routeIs('parametrage.*') ? 'active' : '' }}"
-                        title="Paramétrage" style="width:100%;border:none;background:none;text-align:left;cursor:pointer;">
-                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                        <span class="nav-text">Paramétrage</span>
-                        <svg class="nav-chevron" :class="open ? 'rotate' : ''" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div x-show="open" x-transition.duration.100ms class="nav-submenu">
-                        <a href="{{ route('parametrage.organisation.index') }}"
-                           class="nav-sub-item {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">
-                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            Organisation
-                        </a>
-                        <a href="{{ route('parametrage.emplois.index') }}"
-                           class="nav-sub-item {{ request()->routeIs('parametrage.emplois.*') ? 'active' : '' }}">
-                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            Référentiel des emplois
-                        </a>
-                        <a href="{{ route('parametrage.paie') }}"
-                           class="nav-sub-item {{ request()->routeIs('parametrage.paie*') ? 'active' : '' }}">
-                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Paramètres paie
-                        </a>
+                {{-- Personnel --}}
+                <div class="nav-group">
+                    <a href="{{ route('personnel.index') }}" class="nav-icon-btn {{ request()->routeIs('personnel.*') ? 'active' : '' }}" title="Personnel">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span class="nav-text">Employés</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Personnel</div>
+                        <a href="{{ route('personnel.index') }}" class="flyout-link {{ request()->routeIs('personnel.*') ? 'active' : '' }}">Employés</a>
                     </div>
+                </div>
+
+                {{-- Contrats --}}
+                <div class="nav-group">
+                    <a href="{{ route('contrats.index') }}" class="nav-icon-btn {{ request()->routeIs('contrats.*') ? 'active' : '' }}" title="Contrats">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span class="nav-text">Contrats</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Contrats</div>
+                        <a href="{{ route('contrats.index') }}" class="flyout-link {{ request()->routeIs('contrats.*') ? 'active' : '' }}">Contrats</a>
+                    </div>
+                </div>
+
+                <div class="nav-sep"></div>
+
+                {{-- Absences --}}
+                <div class="nav-group">
+                    <a href="{{ route('absences.index') }}" class="nav-icon-btn {{ request()->routeIs('absences.*') ? 'active' : '' }}" title="Absences">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                        <span class="nav-text">Absences</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Absences & Temps</div>
+                        <a href="{{ route('absences.index') }}" class="flyout-link {{ request()->routeIs('absences.*') ? 'active' : '' }}">Absences</a>
+                    </div>
+                </div>
+
+                {{-- Congés --}}
+                <div class="nav-group">
+                    <a href="{{ route('conges.index') }}" class="nav-icon-btn {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Congés">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="nav-text">Congés</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Congés</div>
+                        <a href="{{ route('conges.index') }}" class="flyout-link {{ !request()->is('conges*', ['statut'=>'soumis']) && request()->routeIs('conges.*') ? 'active' : '' }}">Congés</a>
+                        <a href="{{ route('conges.index', ['statut' => 'soumis']) }}" class="flyout-link {{ request()->is('conges*') && request()->get('statut') === 'soumis' ? 'active' : '' }}">Approbations</a>
+                    </div>
+                </div>
+
+                <div class="nav-sep"></div>
+
+                {{-- Paie --}}
+                <div class="nav-group">
+                    <a href="{{ route('paie.index') }}" class="nav-icon-btn {{ request()->routeIs('paie.*') ? 'active' : '' }}" title="Paie">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span class="nav-text">Paie</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Rémunération</div>
+                        <a href="{{ route('paie.index') }}" class="flyout-link {{ request()->routeIs('paie.*') && !request()->routeIs('paie.livre') ? 'active' : '' }}">Bulletins de paie</a>
+                        <a href="{{ route('paie.livre') }}" class="flyout-link {{ request()->routeIs('paie.livre') ? 'active' : '' }}">Livre de paie</a>
+                    </div>
+                </div>
+
+                <div class="nav-sep"></div>
+
+                {{-- Évaluations --}}
+                <div class="nav-group">
+                    <a href="{{ route('evaluations.index') }}" class="nav-icon-btn {{ request()->routeIs('evaluations.*') ? 'active' : '' }}" title="Évaluations">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span class="nav-text">Évaluations</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Développement</div>
+                        <a href="{{ route('evaluations.index') }}" class="flyout-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">Évaluations</a>
+                    </div>
+                </div>
+
+                {{-- Formations --}}
+                <div class="nav-group">
+                    <a href="{{ route('formations.index') }}" class="nav-icon-btn {{ request()->routeIs('formations.*') ? 'active' : '' }}" title="Formations">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        <span class="nav-text">Formations</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Formation</div>
+                        <a href="{{ route('formations.index') }}" class="flyout-link {{ request()->routeIs('formations.*') ? 'active' : '' }}">Formations</a>
+                    </div>
+                </div>
+
+                <div class="nav-sep"></div>
+
+                {{-- Documents --}}
+                <div class="nav-group">
+                    <a href="{{ route('documents.index') }}" class="nav-icon-btn {{ request()->routeIs('documents.*') ? 'active' : '' }}" title="Documents">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        <span class="nav-text">Documents</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Documents</div>
+                        <a href="{{ route('documents.index') }}" class="flyout-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">Documents</a>
+                    </div>
+                </div>
+
+                {{-- Paramétrage --}}
+                <div class="nav-group">
+                    <a href="{{ route('parametrage.index') }}" class="nav-icon-btn {{ request()->routeIs('parametrage.*') ? 'active' : '' }}" title="Paramétrage">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <span class="nav-text">Paramétrage</span>
+                    </a>
+                    <div class="flyout">
+                        <div class="flyout-title">Paramétrage</div>
+                        <a href="{{ route('parametrage.organisation.index') }}" class="flyout-link {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">Organisation</a>
+                        <a href="{{ route('parametrage.emplois.index') }}" class="flyout-link {{ request()->routeIs('parametrage.emplois.*') ? 'active' : '' }}">Référentiel des emplois</a>
+                        <a href="{{ route('parametrage.paie') }}" class="flyout-link {{ request()->routeIs('parametrage.paie*') ? 'active' : '' }}">Paramètres paie</a>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- Avatar utilisateur en bas --}}
+            <div class="sidebar-user" title="{{ auth()->user()->name }}">
+                <div class="u-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                <div class="u-info" style="display:none;">
+                    <div class="u-name">{{ auth()->user()->name }}</div>
+                    <div class="u-role">{{ auth()->user()->role_label ?? '' }}</div>
                 </div>
             </div>
 
@@ -595,25 +645,6 @@
 </div>
 
 <script>
-function toggleNav() {
-    var sidebar = document.getElementById('sidebar');
-    var logo    = document.getElementById('topbar-logo');
-    var icon    = document.getElementById('toggle-icon');
-    var slim    = sidebar.classList.toggle('slim');
-    logo.classList.toggle('slim', slim);
-    icon.innerHTML = slim
-        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>'
-        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
-    localStorage.setItem('gcm-slim', slim ? '1' : '');
-}
-(function() {
-    if (localStorage.getItem('gcm-slim')) {
-        var s = document.getElementById('sidebar'), l = document.getElementById('topbar-logo'), i = document.getElementById('toggle-icon');
-        if (s) s.classList.add('slim');
-        if (l) l.classList.add('slim');
-        if (i) i.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>';
-    }
-})();
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function switchTab(name, btn) {

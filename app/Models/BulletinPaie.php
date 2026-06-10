@@ -50,6 +50,16 @@ class BulletinPaie extends Model
         return (float)($this->ir_mensuel + $this->amo_salarie + $this->cnss_salarie + $this->cimr_salarie);
     }
 
+    public function getBrutAttribute(): float
+    {
+        return (float)$this->salaire_base + (float)$this->prime_anciennete + (float)$this->total_primes;
+    }
+
+    public function getCoutEmployeurAttribute(): float
+    {
+        return $this->brut + (float)$this->total_patronal;
+    }
+
     public function getPeriodeLibelleAttribute(): string
     {
         $mois = ["", "Janvier","Février","Mars","Avril","Mai","Juin",

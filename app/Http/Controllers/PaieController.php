@@ -138,6 +138,35 @@ class PaieController extends Controller
     }
 
     /**
+     * Livre de paie mensuel — registre légal Art. 371 C.T. marocain.
+     */
+    public function livre(Request $request)
+    {
+        // Défaut : dernière période qui a des bulletins
+        $dernier = BulletinPaie::selectRaw('periode_mois, periode_annee')
+            ->orderByDesc('periode_annee')->orderByDesc('periode_mois')
+            ->first();
+
+        $mois  = (int) $request->get('mois',  $dernier?->periode_mois  ?? now()->month);
+        $annee = (int) $request->get('annee', $dernier?->periode_annee ?? now()->year);
+
+        $bulletins = BulletinPaie::with('employe.fichePoste')
+            ->where('periode_mois', $mois)
+            ->where('periode_annee', $annee)
+            ->join('employes', 'bulletins_paie.employe_id', '=', 'employes.id')
+            ->orderBy('employes.nom')
+            ->select('bulletins_paie.*')
+            ->get();
+
+        $societe  = ParametrageRh::getGroupe('societe');
+        $moisNoms = ["","Janvier","Février","Mars","Avril","Mai","Juin",
+                     "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+        $moisNom  = $moisNoms[$mois] ?? $mois;
+
+        return view('paie.livre', compact('bulletins', 'mois', 'annee', 'societe', 'moisNom', 'moisNoms'));
+    }
+
+    /**
      * Retourne les taux actuels en JSON (utilisé par le formulaire JS).
      */
     public function taux()
