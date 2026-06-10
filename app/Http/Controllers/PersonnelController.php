@@ -1,17 +1,17 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Employe;
-use App\Models\AuditLog;
-use App\Models\FichePoste;
-use App\Models\CategorieEmploye;
+use App\Http\Controllers\Concerns\HasFicheData;
 use App\Http\Requests\StoreEmployeRequest;
 use App\Http\Requests\UpdateEmployeRequest;
+use App\Models\AuditLog;
+use App\Models\Employe;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PersonnelController extends Controller
 {
+    use HasFicheData;
+
     // ── Liste ──────────────────────────────────────────────────────
     public function index(Request $request)
     {
@@ -34,7 +34,7 @@ class PersonnelController extends Controller
 
         $stats = [
             "total"    => Employe::count(),
-            "actifs"   => Employe::where("statut", "actif")->count(),
+            "actifs"   => Employe::actifs()->count(),
             "inactifs" => Employe::whereIn("statut", ["inactif", "suspendu"])->count(),
             "expires"  => Employe::whereHas("contratActif", fn($q) =>
                               $q->whereNotNull("date_fin")
@@ -60,7 +60,7 @@ class PersonnelController extends Controller
     {
         $data = $request->validated();
         $data["created_by"]  = auth()->id();
-        $data["matricule"]   = $this->generateMatricule();
+        $data["matricule"]   = Employe::generateMatricule();
 
         if ($request->hasFile("photo")) {
             $data["photo"] = $request->file("photo")->store("employes/photos", "public");
@@ -84,7 +84,7 @@ class PersonnelController extends Controller
             "conges"        => fn($q) => $q->latest()->limit(5),
             "bulletinsPaie" => fn($q) => $q->latest()->limit(5),
         ]);
-        $auditLogs = \App\Models\AuditLog::where("module", "Personnel")
+        $auditLogs = AuditLog::where("module", "Personnel")
                         ->where("description", "like", "%{$employe->matricule}%")
                         ->latest()->limit(20)->with("user")->get();
         return view("personnel.show", compact("employe", "auditLogs"));
@@ -138,30 +138,4 @@ class PersonnelController extends Controller
         return back()->with("success", "Statut mis à jour.");
     }
 
-    // ── Référentiel des emplois ────────────────────────────────────
-    private function ficheData(): array
-    {
-        $fiches = FichePoste::with(['categorie','fonction','poste'])
-            ->where('actif', true)
-            ->get()
-            ->sortBy([
-                fn($f) => $f->categorie?->ordre ?? 99,
-                fn($f) => $f->fonction?->nom,
-                fn($f) => $f->poste?->nom,
-            ]);
-        $categories = CategorieEmploye::where('actif', true)->orderBy('ordre')->get();
-        return [$fiches, $categories];
-    }
-
-    // ── Génération du matricule ────────────────────────────────────
-    private function generateMatricule(): string
-    {
-        $annee   = date("Y");
-        $dernier = Employe::where("matricule", "like", "EMP-{$annee}-%")
-                          ->orderByDesc("matricule")
-                          ->value("matricule");
-
-        $seq = $dernier ? (int) substr($dernier, -4) + 1 : 1;
-        return "EMP-{$annee}-" . str_pad($seq, 4, "0", STR_PAD_LEFT);
-    }
 }

@@ -67,7 +67,7 @@ class Contrat extends Model
         return null;
     }
 
-    public function generateReference(): string
+    public static function generateReference(): string
     {
         $annee = date('Y');
         $last  = static::where('reference', 'like', "CTR-{$annee}-%")->max('reference');

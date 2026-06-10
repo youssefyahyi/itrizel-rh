@@ -38,13 +38,17 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('conges/{conge}/approuver', [CongeController::class, 'approuver'])->name('conges.approuver');
     Route::patch('conges/{conge}/rejeter',   [CongeController::class, 'rejeter'])->name('conges.rejeter');
     Route::resource('paie',        PaieController::class)->parameters(['paie' => 'paie']);
+    Route::get('paie/{paie}/print', [PaieController::class, 'print'])->name('paie.print');
+    Route::get('paie-taux',         [PaieController::class, 'taux'])->name('paie.taux');
     Route::resource('evaluations', EvaluationController::class)->parameters(['evaluations' => 'evaluation']);
     Route::resource('formations',  FormationController::class)->parameters(['formations' => 'formation']);
     Route::resource('documents',   DocumentController::class);
 
     // Paramétrage
     Route::prefix('parametrage')->name('parametrage.')->group(function () {
-        Route::get('/', [ParametrageController::class, 'index'])->name('index');
+        Route::get('/',            [ParametrageController::class, 'index'])->name('index');
+        Route::get('paie',         [ParametrageController::class, 'paie'])->name('paie');
+        Route::post('paie',        [ParametrageController::class, 'updatePaie'])->name('paie.update');
 
         // Organisation
         Route::get('organisation',           [OrganisationController::class, 'index'])->name('organisation.index');

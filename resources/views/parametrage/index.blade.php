@@ -30,13 +30,13 @@
             </div>
         </div>
 
-        <div class="param-card param-card-disabled">
+        <a href="{{ route('parametrage.paie') }}" class="param-card">
             <div class="param-card-icon">&#128176;</div>
             <div>
-                <div class="param-card-title">Grille de paie</div>
-                <div class="param-card-desc">Rubriques, cotisations, barèmes — à venir</div>
+                <div class="param-card-title">Paramètres paie</div>
+                <div class="param-card-desc">Société, taux CNSS/AMO/CIMR, barème IR</div>
             </div>
-        </div>
+        </a>
 
     </div>
 </div>

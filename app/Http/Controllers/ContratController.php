@@ -1,39 +1,43 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HasFicheData;
+use App\Http\Requests\StoreContratRequest;
+use App\Http\Requests\UpdateContratRequest;
+use App\Models\AuditLog;
 use App\Models\Contrat;
 use App\Models\Employe;
-use App\Models\AuditLog;
-use App\Models\FichePoste;
-use App\Models\CategorieEmploye;
 use Illuminate\Http\Request;
 
 class ContratController extends Controller
 {
+    use HasFicheData;
+
     public function index(Request $request)
     {
         $query = Contrat::with(['employe.fichePoste', 'fichePoste.poste'])->latest();
 
         if ($request->filled('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('reference', 'like', "%{$request->q}%")
+            $q = $request->q;
+            $query->where(function ($w) use ($q) {
+                $w->where('reference', 'like', "%{$q}%")
                   ->orWhereHas('employe', fn($e) =>
-                      $e->where('nom', 'like', "%{$request->q}%")
-                        ->orWhere('prenom', 'like', "%{$request->q}%")
+                      $e->where('nom', 'like', "%{$q}%")->orWhere('prenom', 'like', "%{$q}%")
                   );
             });
         }
 
-        if ($request->filled('statut'))  $query->where('statut', $request->statut);
-        if ($request->filled('type'))    $query->where('type', $request->type);
+        if ($request->filled('statut'))     $query->where('statut', $request->statut);
+        if ($request->filled('type'))       $query->where('type', $request->type);
         if ($request->filled('employe_id')) $query->where('employe_id', $request->employe_id);
 
         $contrats = $query->paginate(20)->withQueryString();
 
         $stats = [
-            'total'     => Contrat::where('statut', 'en_cours')->count(),
-            'cdd'       => Contrat::where('statut', 'en_cours')->where('type', 'CDD')->count(),
-            'cdi'       => Contrat::where('statut', 'en_cours')->where('type', 'CDI')->count(),
+            'total'     => Contrat::actifs()->count(),
+            'cdd'       => Contrat::actifs()->where('type', 'CDD')->count(),
+            'cdi'       => Contrat::actifs()->where('type', 'CDI')->count(),
             'expirants' => Contrat::expirants(30)->count(),
         ];
 
@@ -42,32 +46,23 @@ class ContratController extends Controller
 
     public function create()
     {
-        $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
+        $employes = Employe::actifs()->orderBy('nom')->get();
         [$fiches, $categories] = $this->ficheData();
-        return view('contrats.form', ['contrat' => new Contrat, 'mode' => 'create',
-            'employes' => $employes, 'fiches' => $fiches, 'categories' => $categories]);
+        return view('contrats.form', [
+            'contrat'    => new Contrat,
+            'mode'       => 'create',
+            'employes'   => $employes,
+            'fiches'     => $fiches,
+            'categories' => $categories,
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreContratRequest $request)
     {
-        $data = $request->validate([
-            'employe_id'          => 'required|exists:employes,id',
-            'type'                => 'required|in:CDD,CDI,interim,vacataire',
-            'fiche_poste_id'      => 'nullable|exists:fiches_poste,id',
-            'salaire_base'        => 'required|numeric|min:0',
-            'date_debut'          => 'required|date|after_or_equal:today',
-            'date_fin'            => 'nullable|date|after:date_debut',
-            'duree_mois'          => 'nullable|integer|min:1',
-            'renouvellement_auto' => 'boolean',
-            'observations'        => 'nullable|string',
-        ], [
-            'date_debut.after_or_equal' => 'La date de début du contrat ne peut pas être dans le passé.',
-            'date_fin.after'            => 'La date de fin doit être postérieure à la date de début.',
-        ]);
-
-        $data['reference']  = (new Contrat)->generateReference();
-        $data['statut']     = 'en_cours';
-        $data['created_by'] = auth()->id();
+        $data = $request->validated();
+        $data['reference']           = Contrat::generateReference();
+        $data['statut']              = 'en_cours';
+        $data['created_by']          = auth()->id();
         $data['renouvellement_auto'] = $request->boolean('renouvellement_auto');
 
         $contrat = Contrat::create($data);
@@ -85,47 +80,26 @@ class ContratController extends Controller
 
     public function edit(Contrat $contrat)
     {
-        $employes = Employe::where('statut', 'actif')->orderBy('nom')->get();
+        $employes = Employe::actifs()->orderBy('nom')->get();
         [$fiches, $categories] = $this->ficheData();
-        return view('contrats.form', ['contrat' => $contrat, 'mode' => 'edit',
-            'employes' => $employes, 'fiches' => $fiches, 'categories' => $categories]);
+        return view('contrats.form', [
+            'contrat'    => $contrat,
+            'mode'       => 'edit',
+            'employes'   => $employes,
+            'fiches'     => $fiches,
+            'categories' => $categories,
+        ]);
     }
 
-    public function update(Request $request, Contrat $contrat)
+    public function update(UpdateContratRequest $request, Contrat $contrat)
     {
-        $data = $request->validate([
-            'fiche_poste_id'      => 'nullable|exists:fiches_poste,id',
-            'salaire_base'        => 'required|numeric|min:0',
-            'date_debut'          => 'required|date',
-            'date_fin'            => 'nullable|date|after:date_debut',
-            'duree_mois'          => 'nullable|integer|min:1',
-            'renouvellement_auto' => 'boolean',
-            'statut'              => 'required|in:en_cours,expire,renouvele,resilie,cloture',
-            'motif_resiliation'   => 'nullable|string|max:255',
-            'observations'        => 'nullable|string',
-        ]);
-
+        $data = $request->validated();
         $data['renouvellement_auto'] = $request->boolean('renouvellement_auto');
         $contrat->update($data);
 
         AuditLog::log('Contrats', 'modification', "Contrat {$contrat->reference} modifié", $contrat);
 
         return redirect()->route('contrats.show', $contrat)->with('success', 'Contrat mis à jour.');
-    }
-
-    // ── Référentiel des emplois ────────────────────────────────────
-    private function ficheData(): array
-    {
-        $fiches = FichePoste::with(['categorie','fonction','poste'])
-            ->where('actif', true)
-            ->get()
-            ->sortBy([
-                fn($f) => $f->categorie?->ordre ?? 99,
-                fn($f) => $f->fonction?->nom,
-                fn($f) => $f->poste?->nom,
-            ]);
-        $categories = CategorieEmploye::where('actif', true)->orderBy('ordre')->get();
-        return [$fiches, $categories];
     }
 
     public function destroy(Contrat $contrat)

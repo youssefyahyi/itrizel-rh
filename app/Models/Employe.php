@@ -41,11 +41,37 @@ class Employe extends Model
     }
 
     // ── Scopes ─────────────────────────────────────────────────────
-    public function scopeActifs($query)       { return $query->where("statut", "actif"); }
+    public function scopeActifs($query) { return $query->where('statut', 'actif'); }
+
+    // ── Génération du matricule ─────────────────────────────────────
+    /**
+     * Génère le prochain matricule unique au format EMP-AAAA-XXXX.
+     * Méthode statique : logique métier de numérotation dans le modèle.
+     */
+    public static function generateMatricule(): string
+    {
+        $annee   = date('Y');
+        $dernier = static::where('matricule', 'like', "EMP-{$annee}-%")
+                         ->orderByDesc('matricule')
+                         ->value('matricule');
+        $seq = $dernier ? (int) substr($dernier, -4) + 1 : 1;
+        return "EMP-{$annee}-" . str_pad($seq, 4, '0', STR_PAD_LEFT);
+    }
 
     // ── Relations ──────────────────────────────────────────────────
-    public function contrats(): HasMany         { return $this->hasMany(Contrat::class); }
-    public function contratActif()              { return $this->hasOne(Contrat::class)->where("statut","en_cours")->latest(); }
+    public function contrats(): HasMany  { return $this->hasMany(Contrat::class); }
+
+    /**
+     * Contrat actif courant — utilise latestOfMany() pour garantir
+     * qu'un seul enregistrement est retourné même si plusieurs contrats
+     * sont en cours (cas de renouvellement sans clôture de l'ancien).
+     */
+    public function contratActif(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Contrat::class)
+                    ->where('statut', 'en_cours')
+                    ->latestOfMany();
+    }
     public function absences(): HasMany         { return $this->hasMany(Absence::class); }
     public function conges(): HasMany           { return $this->hasMany(Conge::class); }
     public function bulletinsPaie(): HasMany    { return $this->hasMany(BulletinPaie::class); }
@@ -71,14 +97,27 @@ class Employe extends Model
         return $this->hasMany(self::class, 'manager_id');
     }
 
-    /** Retourne tous les subordonnés récursivement */
-    public function tousSubordonnes(): \Illuminate\Database\Eloquent\Collection
+    /**
+     * Retourne tous les subordonnés récursivement.
+     *
+     * @param  int  $profondeurMax  Protection contre les cycles ou les orgs très profondes.
+     * @param  array $vus           IDs déjà parcourus (détection de cycle).
+     */
+    public function tousSubordonnes(int $profondeurMax = 10, array $vus = []): \Illuminate\Database\Eloquent\Collection
     {
         $result = new \Illuminate\Database\Eloquent\Collection();
+
+        if ($profondeurMax <= 0 || in_array($this->id, $vus, true)) {
+            return $result;
+        }
+
+        $vus[] = $this->id;
+
         foreach ($this->subordonnes as $sub) {
             $result->push($sub);
-            $result = $result->merge($sub->tousSubordonnes());
+            $result = $result->merge($sub->tousSubordonnes($profondeurMax - 1, $vus));
         }
+
         return $result;
     }
 

@@ -69,7 +69,13 @@
         <input type="number" name="avances_deduites" class="form-control" value="{{ old('avances_deduites', $bulletin->avances_deduites ?? 0) }}" step="0.01" min="0">
     </x-rh.form-field>
     <x-rh.form-field label="Net à payer (DH)" name="net_a_payer" :required="true">
-        <input type="number" name="net_a_payer" class="form-control @error('net_a_payer') is-invalid @enderror" value="{{ old('net_a_payer', $bulletin->net_a_payer) }}" step="0.01" min="0" style="font-weight:600;color:var(--accent);">
+        <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="net_a_payer" name="net_a_payer" class="form-control @error('net_a_payer') is-invalid @enderror" value="{{ old('net_a_payer', $bulletin->net_a_payer) }}" step="0.01" min="0" style="font-weight:600;color:var(--accent);">
+            <button type="button" id="btn-autocalc" title="Calculer automatiquement les cotisations et le net à payer à partir du salaire brut" style="white-space:nowrap;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--accent);border-radius:var(--radius-sm);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Auto-calc
+            </button>
+        </div>
     </x-rh.form-field>
     @if($mode === 'edit')
     <x-rh.form-field label="Statut" name="statut">
@@ -94,6 +100,85 @@
 </div>
 </form>
 </div>
+<script>
+document.getElementById('btn-autocalc').addEventListener('click', async function () {
+    const brut = parseFloat(document.querySelector('[name=salaire_base]').value || 0)
+               + parseFloat(document.querySelector('[name=total_primes]').value || 0);
+    if (brut <= 0) { alert('Saisissez d\'abord le salaire de base.'); return; }
+
+    // Nombre d'enfants (via champ employe_id → non dispo ici, on part de 0)
+    const nbCharges = 0;
+
+    let taux;
+    try {
+        const r = await fetch('{{ route("paie.taux") }}');
+        taux = await r.json();
+    } catch(e) {
+        alert('Impossible de récupérer les taux. Vérifiez votre connexion.'); return;
+    }
+
+    // ── CNSS ────────────────────────────────────────────────────────
+    const baseAssiet = Math.min(brut, taux.cnss_plafond);
+    const cnss = Math.round(baseAssiet * taux.cnss_taux_salarie / 100 * 100) / 100;
+
+    // ── AMO ─────────────────────────────────────────────────────────
+    const amo = Math.round(brut * taux.amo_taux_salarie / 100 * 100) / 100;
+
+    // ── CIMR (si activé) ────────────────────────────────────────────
+    const cimr = taux.cimr_actif
+        ? Math.round(brut * taux.cimr_taux_salarie / 100 * 100) / 100
+        : 0;
+
+    // ── IR mensuel ──────────────────────────────────────────────────
+    const baseImposable = brut - cnss - amo;
+    const abatCalc = baseImposable * taux.ir_abattement_taux / 100;
+    const abatMin  = taux.ir_abattement_min / 12;
+    const abatMax  = taux.ir_abattement_max / 12;
+    const abat     = Math.max(abatMin, Math.min(abatMax, abatCalc));
+    const netImpMois = Math.max(0, baseImposable - abat);
+    const netImpAn   = netImpMois * 12;
+
+    let irAn = 0;
+    const bareme = taux.ir_bareme;
+    for (const tranche of bareme) {
+        if (netImpAn > tranche.min) {
+            irAn = netImpAn * tranche.taux / 100 - tranche.somme_a_deduire;
+        }
+    }
+
+    // Déduction charges familiales
+    const deducCharges = nbCharges * taux.ir_deduction_charge_annuel;
+    irAn = Math.max(0, irAn - deducCharges);
+    const ir = Math.round(irAn / 12 * 100) / 100;
+
+    // ── Net à payer ─────────────────────────────────────────────────
+    const totalRet = cnss + amo + cimr + ir;
+    const net = Math.round((brut - totalRet) * 100) / 100;
+
+    // ── Remplir les champs ───────────────────────────────────────────
+    const set = (name, val) => {
+        const el = document.querySelector('[name=' + name + ']');
+        if (el) el.value = Math.max(0, val).toFixed(2);
+    };
+    set('cnss_salarie',    cnss);
+    set('amo_salarie',     amo);
+    set('cimr_salarie',    cimr);
+    set('ir_mensuel',      ir);
+    set('net_a_payer',     net);
+
+    // Feedback visuel
+    this.style.background = 'var(--success-light)';
+    this.style.color       = 'var(--success)';
+    this.style.borderColor = 'var(--success)';
+    this.innerHTML = '✓ Calculé';
+    setTimeout(() => {
+        this.style.background = 'var(--accent-soft)';
+        this.style.color       = 'var(--accent)';
+        this.style.borderColor = 'var(--accent)';
+        this.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Auto-calc';
+    }, 2500);
+});
+</script>
 <style>
 .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
 .form-card-header{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border-light);background:var(--surface-soft);}

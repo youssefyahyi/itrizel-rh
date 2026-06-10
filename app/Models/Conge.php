@@ -51,16 +51,7 @@ class Conge extends Model
 
     public function getTypeCongeLibelleAttribute(): string
     {
-        return match($this->type_conge) {
-            "annuel"       => "Congé annuel",
-            "maladie"      => "Congé maladie",
-            "maternite"    => "Congé maternité",
-            "paternite"    => "Congé paternité",
-            "sans_solde"   => "Sans solde",
-            "exceptionnel" => "Exceptionnel",
-            "recuperation" => "Récupération",
-            default        => $this->type_conge,
-        };
+        return self::TYPES[$this->type_conge] ?? $this->type_conge;
     }
 
     // ── Relations ──────────────────────────────────────────────────

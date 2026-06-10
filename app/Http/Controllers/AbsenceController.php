@@ -26,7 +26,7 @@ class AbsenceController extends Controller
     }
     public function create()
     {
-        $employes = Employe::where('statut','actif')->orderBy('nom')->get();
+        $employes = Employe::actifs()->orderBy('nom')->get();
         return view('absences.form', ['absence' => new Absence, 'mode' => 'create', 'employes' => $employes]);
     }
     public function store(Request $request)
@@ -50,7 +50,7 @@ class AbsenceController extends Controller
     public function show(Absence $absence) { $absence->load('employe'); return view('absences.show',compact('absence')); }
     public function edit(Absence $absence)
     {
-        $employes = Employe::where('statut','actif')->orderBy('nom')->get();
+        $employes = Employe::actifs()->orderBy('nom')->get();
         return view('absences.form',['absence'=>$absence,'mode'=>'edit','employes'=>$employes]);
     }
     public function update(Request $request, Absence $absence)

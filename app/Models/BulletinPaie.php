@@ -11,16 +11,30 @@ class BulletinPaie extends Model
 
     protected $fillable = [
         "employe_id","periode_mois","periode_annee","salaire_base",
-        "total_primes","total_retenues","net_imposable","ir_mensuel",
+        "prime_anciennete","total_primes","total_retenues","net_imposable","ir_mensuel",
         "amo_salarie","cnss_salarie","cimr_salarie","avances_deduites",
+        "cnss_patronal","amo_patronal","cimr_patronal","total_patronal",
+        "jours_travailles","heures_travailles",
         "net_a_payer","statut","date_paiement","created_by",
     ];
 
     protected $casts = [
-        "date_paiement"   => "date",
-        "salaire_base"    => "decimal:2",
-        "net_a_payer"     => "decimal:2",
-        "ir_mensuel"      => "decimal:2",
+        "date_paiement"    => "date",
+        "salaire_base"     => "decimal:2",
+        "prime_anciennete" => "decimal:2",
+        "total_primes"     => "decimal:2",
+        "total_retenues"   => "decimal:2",
+        "net_imposable"    => "decimal:2",
+        "ir_mensuel"       => "decimal:2",
+        "amo_salarie"      => "decimal:2",
+        "cnss_salarie"     => "decimal:2",
+        "cimr_salarie"     => "decimal:2",
+        "avances_deduites" => "decimal:2",
+        "cnss_patronal"    => "decimal:2",
+        "amo_patronal"     => "decimal:2",
+        "cimr_patronal"    => "decimal:2",
+        "total_patronal"   => "decimal:2",
+        "net_a_payer"      => "decimal:2",
     ];
 
     const STATUTS = [
