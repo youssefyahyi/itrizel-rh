@@ -8,9 +8,9 @@ use App\Models\FichePoste;
 class Contrat extends Model
 {
     protected $fillable = [
-        "employe_id","reference","type","fiche_poste_id","salaire_base",
+        "employe_id","contrat_parent_id","reference","type","fiche_poste_id","salaire_base",
         "date_debut","date_fin","duree_mois","renouvellement_auto","calendrier_conges",
-        "statut","motif_resiliation","observations","created_by",
+        "statut","motif_resiliation","observations","pdf_path","created_by",
     ];
 
     protected $casts = [
@@ -76,7 +76,18 @@ class Contrat extends Model
     }
 
     // ── Relations ──────────────────────────────────────────────────
-    public function employe(): BelongsTo    { return $this->belongsTo(Employe::class); }
-    public function createdBy(): BelongsTo  { return $this->belongsTo(User::class, "created_by"); }
-    public function fichePoste(): BelongsTo { return $this->belongsTo(FichePoste::class, 'fiche_poste_id'); }
+    public function employe(): BelongsTo       { return $this->belongsTo(Employe::class); }
+    public function createdBy(): BelongsTo     { return $this->belongsTo(User::class, "created_by"); }
+    public function fichePoste(): BelongsTo    { return $this->belongsTo(FichePoste::class, 'fiche_poste_id'); }
+    public function parent(): BelongsTo        { return $this->belongsTo(Contrat::class, 'contrat_parent_id'); }
+    public function renouvellements()          { return $this->hasMany(Contrat::class, 'contrat_parent_id'); }
+    public function avenants()                 { return $this->hasMany(Avenant::class)->orderBy('date_effet'); }
+
+    public static function aDejaContratActif(int $employeId, ?int $exceptContratId = null): bool
+    {
+        return static::where('employe_id', $employeId)
+            ->where('statut', 'en_cours')
+            ->when($exceptContratId, fn($q) => $q->where('id', '!=', $exceptContratId))
+            ->exists();
+    }
 }

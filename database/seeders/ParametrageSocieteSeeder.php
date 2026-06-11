@@ -16,7 +16,8 @@ class ParametrageSocieteSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'societe.nom'         => 'ALF SEBOU SARL AU',
+            'societe.nom'            => 'ALF SEBOU',
+            'societe.forme_juridique'=> 'SARL AU',
             'societe.adresse'     => 'Zone Industrielle Aïn Sebaa, Lot 47',
             'societe.ville'       => 'Kénitra',
             'societe.ice'         => '002345678000091',

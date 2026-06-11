@@ -18,15 +18,24 @@
 @if($mode === 'edit') @method('PUT') @endif
 
 <x-rh.form-section title="Employé & Type">
-    <x-rh.form-field label="Employé" name="employe_id" :required="true">
-        <select name="employe_id" class="form-control @error('employe_id') is-invalid @enderror" {{ $mode === 'edit' ? 'disabled' : '' }}>
-            <option value="">— Sélectionner un employé —</option>
-            @foreach($employes as $emp)
-            <option value="{{ $emp->id }}" {{ old('employe_id', $contrat->employe_id) == $emp->id ? 'selected' : '' }}>
-                {{ $emp->nom_complet }} — {{ $emp->matricule }}
-            </option>
-            @endforeach
-        </select>
+    <x-rh.form-field label="Employé" name="employe_id" :required="true"
+        :hint="$mode === 'create' && $employes->isEmpty() ? 'Tous les employés actifs ont déjà un contrat en cours.' : null">
+        @if($mode === 'create' && $employePreselectionne)
+            {{-- Pré-sélection depuis la fiche employé — verrou --}}
+            <input type="hidden" name="employe_id" value="{{ $employePreselectionne->id }}">
+            <div class="form-control" style="display:flex;align-items:center;background:var(--surface-soft);color:var(--text-primary);cursor:default;">
+                {{ $employePreselectionne->nom_complet }} — {{ $employePreselectionne->matricule }}
+            </div>
+        @else
+            <select name="employe_id" class="form-control @error('employe_id') is-invalid @enderror" {{ $mode === 'edit' ? 'disabled' : '' }}>
+                <option value="">— Sélectionner un employé sans contrat actif —</option>
+                @foreach($employes as $emp)
+                <option value="{{ $emp->id }}" {{ old('employe_id', $contrat->employe_id) == $emp->id ? 'selected' : '' }}>
+                    {{ $emp->nom_complet }} — {{ $emp->matricule }}
+                </option>
+                @endforeach
+            </select>
+        @endif
     </x-rh.form-field>
 
     <x-rh.form-field label="Type de contrat" name="type" :required="true">

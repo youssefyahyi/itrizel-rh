@@ -18,15 +18,16 @@ class ParametragePaieSeeder extends Seeder
         $params = [
 
             // ── Informations société ──────────────────────────────────────
-            ['groupe' => 'societe', 'cle' => 'societe.nom',         'libelle' => 'Raison sociale',            'valeur' => '',    'description' => 'Nom affiché sur le bulletin de paie'],
-            ['groupe' => 'societe', 'cle' => 'societe.adresse',     'libelle' => 'Adresse',                   'valeur' => '',    'description' => 'Adresse complète'],
-            ['groupe' => 'societe', 'cle' => 'societe.ville',       'libelle' => 'Ville',                     'valeur' => '',    'description' => ''],
-            ['groupe' => 'societe', 'cle' => 'societe.ice',         'libelle' => 'Identifiant Commun Entreprise (ICE)', 'valeur' => '', 'description' => '15 chiffres'],
-            ['groupe' => 'societe', 'cle' => 'societe.rc',          'libelle' => 'Registre du Commerce (RC)', 'valeur' => '',    'description' => ''],
-            ['groupe' => 'societe', 'cle' => 'societe.cnss_patron', 'libelle' => 'N° affilié CNSS employeur', 'valeur' => '',    'description' => ''],
-            ['groupe' => 'societe', 'cle' => 'societe.if',          'libelle' => 'Identifiant Fiscal (IF)',   'valeur' => '',    'description' => ''],
-            ['groupe' => 'societe', 'cle' => 'societe.telephone',   'libelle' => 'Téléphone',                 'valeur' => '',    'description' => ''],
-            ['groupe' => 'societe', 'cle' => 'societe.email',       'libelle' => 'Email',                     'valeur' => '',    'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.nom',              'libelle' => 'Raison sociale',                     'valeur' => '', 'description' => 'Nom affiché sur les bulletins et contrats'],
+            ['groupe' => 'societe', 'cle' => 'societe.forme_juridique', 'libelle' => 'Forme juridique',                   'valeur' => '', 'description' => 'Ex: SARL AU, SA, SAS, SARL'],
+            ['groupe' => 'societe', 'cle' => 'societe.adresse',         'libelle' => 'Adresse',                           'valeur' => '', 'description' => 'Adresse complète'],
+            ['groupe' => 'societe', 'cle' => 'societe.ville',           'libelle' => 'Ville',                             'valeur' => '', 'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.ice',             'libelle' => 'Identifiant Commun Entreprise (ICE)','valeur' => '', 'description' => '15 chiffres'],
+            ['groupe' => 'societe', 'cle' => 'societe.rc',              'libelle' => 'Registre du Commerce (RC)',          'valeur' => '', 'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.cnss_patron',     'libelle' => 'N° affilié CNSS employeur',          'valeur' => '', 'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.if',              'libelle' => 'Identifiant Fiscal (IF)',            'valeur' => '', 'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.telephone',       'libelle' => 'Téléphone',                         'valeur' => '', 'description' => ''],
+            ['groupe' => 'societe', 'cle' => 'societe.email',           'libelle' => 'Email',                             'valeur' => '', 'description' => ''],
 
             // ── CNSS salarié ──────────────────────────────────────────────
             ['groupe' => 'paie', 'cle' => 'paie.cnss_taux_salarie', 'libelle' => 'CNSS — Taux salarié (%)',  'valeur' => '4.48',  'description' => 'Taux CNSS part salariale (en %). Plafonné sur le salaire brut mensuel.'],

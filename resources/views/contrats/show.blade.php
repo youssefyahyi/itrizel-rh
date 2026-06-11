@@ -2,22 +2,47 @@
 <x-rh.page-header
     :title="$contrat->reference"
     :breadcrumbs="['Contrats' => route('contrats.index'), $contrat->reference => null]">
-    <a href="{{ route('contrats.edit', $contrat) }}" class="tb-btn">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        Modifier
+    @if($contrat->statut === 'en_cours' && $contrat->type !== 'interim')
+    <form method="POST" action="{{ route('contrats.pdf', $contrat) }}" style="display:inline;">
+        @csrf
+        @foreach(App\Models\ClauseContrat::actives()->pourType($contrat->type)->where('obligatoire', false)->get() as $cl)
+        <input type="hidden" name="clauses[]" value="{{ $cl->id }}">
+        @endforeach
+        <button type="submit" class="tb-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Télécharger PDF
+        </button>
+    </form>
+    <a href="{{ route('avenants.create', $contrat) }}" class="tb-btn">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Avenant
     </a>
+    <a href="{{ route('contrats.renouveler', $contrat) }}" class="tb-btn" style="color:var(--accent);border-color:var(--accent);">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Renouveler
+    </a>
+    @endif
+    <a href="{{ route('contrats.edit', $contrat) }}" class="tb-btn">Modifier</a>
     <a href="{{ route('contrats.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
 
 @if(session('success'))<x-rh.alert type="success" :message="session('success')" />@endif
+@if(session('error'))<x-rh.alert type="danger" :message="session('error')" />@endif
 
 @if($contrat->alert_expiration)
 <div style="background:var(--warning-light);border:1px solid var(--warning);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--warning);">
     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <strong>Attention :</strong> ce contrat expire le {{ $contrat->date_fin->format('d/m/Y') }}
     ({{ $contrat->jours_restants > 0 ? 'dans '.$contrat->jours_restants.' jour(s)' : 'expiré' }})
+</div>
+@endif
+
+@if($contrat->parent)
+<div style="background:var(--surface-soft);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--text-secondary);">
+    Renouvellement du contrat
+    <a href="{{ route('contrats.show', $contrat->parent) }}" class="link mono">{{ $contrat->parent->reference }}</a>
 </div>
 @endif
 
@@ -28,11 +53,25 @@
             <span style="font-size:18px;font-weight:700;color:var(--text-primary);font-family:monospace;">{{ $contrat->reference }}</span>
             <span class="badge {{ $contrat->statut_badge }}"><span class="dot"></span>{{ $contrat->statut_libelle }}</span>
             <span class="badge {{ $contrat->type === 'CDI' ? 'bg' : 'bb' }}">{{ $contrat->type }}</span>
+            @if($contrat->pdf_path)
+            <a href="{{ route('contrats.pdf', $contrat) }}" class="badge bb" style="text-decoration:none;cursor:pointer;" onclick="this.closest('form') && this.closest('form').submit()">
+                PDF stocké
+            </a>
+            @endif
         </div>
-        <div style="font-size:13px;color:var(--text-secondary);">{{ $contrat->fichePoste?->poste->nom ?? '—' }} — <a href="{{ route('personnel.show', $contrat->employe) }}" class="link">{{ $contrat->employe->nom_complet }}</a></div>
+        <div style="font-size:13px;color:var(--text-secondary);">
+            {{ $contrat->fichePoste?->poste->nom ?? '—' }} —
+            <span style="font-weight:500;color:var(--text-primary);">{{ $contrat->employe->nom_complet }}</span>
+        </div>
         <div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap;">
-            <span class="hero-meta"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Du {{ $contrat->date_debut->format('d/m/Y') }} @if($contrat->date_fin) au {{ $contrat->date_fin->format('d/m/Y') }} @else (illimité) @endif</span>
-            <span class="hero-meta"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg> {{ number_format($contrat->salaire_base, 0, ',', ' ') }} DH / mois</span>
+            <span class="hero-meta">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Du {{ $contrat->date_debut->format('d/m/Y') }} @if($contrat->date_fin) au {{ $contrat->date_fin->format('d/m/Y') }} @else (illimité) @endif
+            </span>
+            <span class="hero-meta">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                {{ number_format($contrat->salaire_base, 0, ',', ' ') }} DH / mois
+            </span>
         </div>
     </div>
 </div>
@@ -41,21 +80,22 @@
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
     <div class="info-card">
         <div class="info-card-title">Détails du contrat</div>
-        <x-rh.detail-row label="Référence"      :value="$contrat->reference" />
-        <x-rh.detail-row label="Type"           :value="$contrat->type" />
-        <x-rh.detail-row label="Catégorie"      :value="$contrat->fichePoste?->categorie->nom ?? '—'" />
-        <x-rh.detail-row label="Poste"          :value="$contrat->fichePoste?->poste->nom ?? '—'" />
-        <x-rh.detail-row label="Date de début"  :value="$contrat->date_debut->format('d/m/Y')" />
-        <x-rh.detail-row label="Date de fin"    :value="$contrat->date_fin?->format('d/m/Y') ?? 'CDI — Sans échéance'" />
+        <x-rh.detail-row label="Référence"           :value="$contrat->reference" />
+        <x-rh.detail-row label="Type"                :value="$contrat->type" />
+        <x-rh.detail-row label="Catégorie"           :value="$contrat->fichePoste?->categorie->nom ?? '—'" />
+        <x-rh.detail-row label="Poste"               :value="$contrat->fichePoste?->poste->nom ?? '—'" />
+        <x-rh.detail-row label="Date de début"       :value="$contrat->date_debut->format('d/m/Y')" />
+        <x-rh.detail-row label="Date de fin"         :value="$contrat->date_fin?->format('d/m/Y') ?? 'CDI — Sans échéance'" />
         @if($contrat->duree_mois)<x-rh.detail-row label="Durée" :value="$contrat->duree_mois.' mois'" />@endif
+        <x-rh.detail-row label="Calendrier congés"   :value="$contrat->calendrier_conges ? ucfirst($contrat->calendrier_conges) : 'Par défaut société'" />
         <x-rh.detail-row label="Renouvellement auto" :value="$contrat->renouvellement_auto ? 'Oui' : 'Non'" />
     </div>
 
     <div class="info-card">
         <div class="info-card-title">Employé</div>
-        <x-rh.detail-row label="Nom complet"    :value="$contrat->employe->nom_complet" />
-        <x-rh.detail-row label="Matricule"      :value="$contrat->employe->matricule" />
-        <x-rh.detail-row label="Catégorie"      :value="$contrat->employe->fichePoste?->categorie->nom ?? '—'" />
+        <x-rh.detail-row label="Nom complet" :value="$contrat->employe->nom_complet" />
+        <x-rh.detail-row label="Matricule"   :value="$contrat->employe->matricule" />
+        <x-rh.detail-row label="Catégorie"   :value="$contrat->employe->fichePoste?->categorie->nom ?? '—'" />
         <div style="padding:12px 0 0;">
             <a href="{{ route('personnel.show', $contrat->employe) }}" class="tb-btn">Voir la fiche employé</a>
         </div>
@@ -66,6 +106,51 @@
 <div class="info-card">
     <div class="info-card-title">Observations</div>
     <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;padding-top:4px;">{{ $contrat->observations }}</p>
+</div>
+@endif
+
+{{-- Avenants --}}
+@if($contrat->avenants->count())
+<div class="info-card">
+    <div class="info-card-title">Avenants ({{ $contrat->avenants->count() }})</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                <th style="padding:6px 0;text-align:left;font-weight:600;">Référence</th>
+                <th style="padding:6px 0;text-align:left;font-weight:600;">Nature</th>
+                <th style="padding:6px 0;text-align:left;font-weight:600;">Date d'effet</th>
+                <th style="padding:6px 0;text-align:left;font-weight:600;">Modification</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach($contrat->avenants as $av)
+        <tr style="border-top:1px solid var(--border-light);">
+            <td style="padding:8px 0;font-family:monospace;font-size:12px;">{{ $av->reference }}</td>
+            <td style="padding:8px 0;">{{ App\Models\Avenant::NATURES[$av->nature] ?? $av->nature }}</td>
+            <td style="padding:8px 0;">{{ $av->date_effet->format('d/m/Y') }}</td>
+            <td style="padding:8px 0;color:var(--text-secondary);">{{ $av->ancienne_valeur }} → {{ $av->nouvelle_valeur }}</td>
+            <td style="padding:8px 0;text-align:right;">
+                <a href="{{ route('avenants.show', $av) }}" class="link" style="font-size:12px;">Voir</a>
+            </td>
+        </tr>
+        @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
+
+{{-- Renouvellements --}}
+@if($contrat->renouvellements->count())
+<div class="info-card">
+    <div class="info-card-title">Renouvellements ({{ $contrat->renouvellements->count() }})</div>
+    @foreach($contrat->renouvellements as $rv)
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--border-light);font-size:13px;">
+        <a href="{{ route('contrats.show', $rv) }}" class="link mono">{{ $rv->reference }}</a>
+        <span class="badge {{ $rv->statut_badge }}">{{ $rv->statut_libelle }}</span>
+        <span style="color:var(--text-secondary);">du {{ $rv->date_debut->format('d/m/Y') }}</span>
+    </div>
+    @endforeach
 </div>
 @endif
 

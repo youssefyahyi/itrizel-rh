@@ -210,7 +210,23 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Historique des contrats</span>
-                    @if(!$isSalarie)<a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau contrat</a>@endif
+                    @if(!$isSalarie)
+                    @php $caTab = $employe->contrats->where('statut','en_cours')->first(); @endphp
+                    @if(!$caTab)
+                        <a href="{{ route('contrats.create', ['employe_id' => $employe->id]) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau contrat</a>
+                    @elseif($caTab->type === 'CDI')
+                        <div style="display:flex;gap:8px;">
+                            <a href="{{ route('avenants.create', $caTab) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Avenant</a>
+                            <a href="{{ route('contrats.edit', $caTab) }}" style="font-size:11px;color:var(--text-secondary);text-decoration:none;font-weight:500;">Modifier</a>
+                        </div>
+                    @else
+                        <div style="display:flex;gap:8px;">
+                            <a href="{{ route('contrats.renouveler', $caTab) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Renouveler</a>
+                            <a href="{{ route('avenants.create', $caTab) }}" style="font-size:11px;color:var(--text-secondary);text-decoration:none;font-weight:500;">Avenant</a>
+                            <a href="{{ route('contrats.edit', $caTab) }}" style="font-size:11px;color:var(--text-secondary);text-decoration:none;font-weight:500;">Modifier</a>
+                        </div>
+                    @endif
+                    @endif
                 </div>
                 @forelse($employe->contrats as $contrat)
                 <a href="{{ route('contrats.show', $contrat) }}" class="related-item" style="text-decoration:none;">
@@ -404,10 +420,6 @@
         <div class="card" style="padding:16px;">
             <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Actions</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Nouveau contrat
-                </a>
                 <a href="{{ route('conges.index') }}?employe_id={{ $employe->id }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     Demander un congé

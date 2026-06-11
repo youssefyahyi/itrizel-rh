@@ -594,8 +594,9 @@
                             <div class="flyout-title">Paramétrage</div>
                             <a href="{{ route('parametrage.organisation.index') }}" class="flyout-link {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">Organisation</a>
                             <a href="{{ route('parametrage.emplois.index') }}" class="flyout-link {{ request()->routeIs('parametrage.emplois.*') ? 'active' : '' }}">Référentiel des emplois</a>
+                            <a href="{{ route('parametrage.contrats.index') }}" class="flyout-link {{ request()->routeIs('parametrage.contrats.*') ? 'active' : '' }}">Contrats</a>
                             <a href="{{ route('parametrage.paie') }}" class="flyout-link {{ request()->routeIs('parametrage.paie*') ? 'active' : '' }}">Paramètres paie</a>
-                            <a href="{{ route('parametrage.rh') }}" class="flyout-link {{ request()->routeIs('parametrage.rh*') ? 'active' : '' }}">Paramètres RH</a>
+                            <a href="{{ route('parametrage.rh') }}" class="flyout-link {{ request()->routeIs('parametrage.rh*') ? 'active' : '' }}">Congés & Temps</a>
                         </div>
                     </div>
 

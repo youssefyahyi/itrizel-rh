@@ -11,6 +11,8 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ParametrageController;
+use App\Http\Controllers\ParametrageContratController;
+use App\Http\Controllers\AvenantController;
 use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\ReferentielEmploisController;
 use App\Http\Controllers\CategorieEmployeController;
@@ -39,6 +41,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('not.salarie')->group(function () {
         Route::patch('personnel/{employe}/toggle-statut', [PersonnelController::class, 'toggleStatut'])->name('personnel.toggle-statut');
         Route::resource('contrats', ContratController::class)->parameters(['contrats' => 'contrat']);
+        Route::get('contrats/{contrat}/renouveler',        [ContratController::class, 'renouveler'])->name('contrats.renouveler');
+        Route::post('contrats/{contrat}/renouveler',       [ContratController::class, 'storeRenouvellement'])->name('contrats.store-renouvellement');
+        Route::post('contrats/{contrat}/pdf',              [ContratController::class, 'genererPdf'])->name('contrats.pdf');
+        Route::get('contrats/{contrat}/avenants/create',   [AvenantController::class, 'create'])->name('avenants.create');
+        Route::post('contrats/{contrat}/avenants',         [AvenantController::class, 'store'])->name('avenants.store');
+        Route::get('avenants/{avenant}',                   [AvenantController::class, 'show'])->name('avenants.show');
+        Route::post('avenants/{avenant}/pdf',              [AvenantController::class, 'genererPdf'])->name('avenants.pdf');
         Route::resource('absences', AbsenceController::class)->parameters(['absences' => 'absence']);
         Route::patch('conges/{conge}/approuver', [CongeController::class, 'approuver'])->name('conges.approuver');
         Route::patch('conges/{conge}/rejeter',   [CongeController::class, 'rejeter'])->name('conges.rejeter');
@@ -60,6 +69,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('rh',                           [ParametrageController::class, 'updateRh'])->name('rh.update');
         Route::post('jours-feries',                 [ParametrageController::class, 'storeJourFerie'])->name('jours-feries.store');
         Route::delete('jours-feries/{jourFerie}',   [ParametrageController::class, 'destroyJourFerie'])->name('jours-feries.destroy');
+
+        // Paramétrage contrats (bibliothèque de clauses)
+        Route::get('contrats',                          [ParametrageContratController::class, 'index'])->name('contrats.index');
+        Route::post('contrats',                         [ParametrageContratController::class, 'store'])->name('contrats.store');
+        Route::put('contrats/{clause}',                 [ParametrageContratController::class, 'update'])->name('contrats.update');
+        Route::delete('contrats/{clause}',              [ParametrageContratController::class, 'destroy'])->name('contrats.destroy');
+        Route::patch('contrats/{clause}/monter',        [ParametrageContratController::class, 'monter'])->name('contrats.monter');
+        Route::patch('contrats/{clause}/descendre',     [ParametrageContratController::class, 'descendre'])->name('contrats.descendre');
 
         // Organisation
         Route::get('organisation',           [OrganisationController::class, 'index'])->name('organisation.index');

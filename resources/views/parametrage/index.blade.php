@@ -25,8 +25,8 @@
         <a href="{{ route('parametrage.rh') }}" class="param-card">
             <div class="param-card-icon">&#9881;&#65039;</div>
             <div>
-                <div class="param-card-title">Paramètres RH</div>
-                <div class="param-card-desc">Congés, quotités de travail, durée légale</div>
+                <div class="param-card-title">Congés & Temps</div>
+                <div class="param-card-desc">Congés, jours fériés, quotités de travail</div>
             </div>
         </a>
 
@@ -35,6 +35,14 @@
             <div>
                 <div class="param-card-title">Paramètres paie</div>
                 <div class="param-card-desc">Société, taux CNSS/AMO/CIMR, barème IR</div>
+            </div>
+        </a>
+
+        <a href="{{ route('parametrage.contrats.index') }}" class="param-card">
+            <div class="param-card-icon">&#128196;</div>
+            <div>
+                <div class="param-card-title">Contrats</div>
+                <div class="param-card-desc">Bibliothèque de clauses CDI, CDD et avenants</div>
             </div>
         </a>
 
