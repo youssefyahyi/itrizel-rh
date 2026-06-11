@@ -1,29 +1,6 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
-    :title="$contrat->reference"
     :breadcrumbs="['Contrats' => route('contrats.index'), $contrat->reference => null]">
-    @if($contrat->statut === 'en_cours' && $contrat->type !== 'interim')
-    <form method="POST" action="{{ route('contrats.pdf', $contrat) }}" style="display:inline;">
-        @csrf
-        @foreach(App\Models\ClauseContrat::actives()->pourType($contrat->type)->where('obligatoire', false)->get() as $cl)
-        <input type="hidden" name="clauses[]" value="{{ $cl->id }}">
-        @endforeach
-        <button type="submit" class="tb-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Télécharger PDF
-        </button>
-    </form>
-    <a href="{{ route('avenants.create', $contrat) }}" class="tb-btn">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Avenant
-    </a>
-    <a href="{{ route('contrats.renouveler', $contrat) }}" class="tb-btn" style="color:var(--accent);border-color:var(--accent);">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        Renouveler
-    </a>
-    @endif
-    <a href="{{ route('contrats.edit', $contrat) }}" class="tb-btn">Modifier</a>
-    <a href="{{ route('contrats.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
@@ -53,11 +30,7 @@
             <span style="font-size:18px;font-weight:700;color:var(--text-primary);font-family:monospace;">{{ $contrat->reference }}</span>
             <span class="badge {{ $contrat->statut_badge }}"><span class="dot"></span>{{ $contrat->statut_libelle }}</span>
             <span class="badge {{ $contrat->type === 'CDI' ? 'bg' : 'bb' }}">{{ $contrat->type }}</span>
-            @if($contrat->pdf_path)
-            <a href="{{ route('contrats.pdf', $contrat) }}" class="badge bb" style="text-decoration:none;cursor:pointer;" onclick="this.closest('form') && this.closest('form').submit()">
-                PDF stocké
-            </a>
-            @endif
+            @if($contrat->pdf_path)<span class="badge bb">PDF stocké</span>@endif
         </div>
         <div style="font-size:13px;color:var(--text-secondary);">
             {{ $contrat->fichePoste?->poste->nom ?? '—' }} —
@@ -73,6 +46,21 @@
                 {{ number_format($contrat->salaire_base, 0, ',', ' ') }} DH / mois
             </span>
         </div>
+    </div>
+    {{-- Boutons d'action --}}
+    <div style="display:flex;gap:8px;flex-shrink:0;align-items:flex-start;">
+        @if($contrat->statut === 'en_cours' && $contrat->type !== 'interim')
+        <form method="POST" action="{{ route('contrats.pdf', $contrat) }}" style="display:inline;">
+            @csrf
+            @foreach(App\Models\ClauseContrat::actives()->pourType($contrat->type)->where('obligatoire', false)->get() as $cl)
+            <input type="hidden" name="clauses[]" value="{{ $cl->id }}">
+            @endforeach
+            <button type="submit" class="btn btn-outline btn-sm">PDF</button>
+        </form>
+        <a href="{{ route('avenants.create', $contrat) }}" class="btn btn-outline btn-sm">Avenant</a>
+        <a href="{{ route('contrats.renouveler', $contrat) }}" class="btn btn-outline btn-sm">Renouveler</a>
+        @endif
+        <a href="{{ route('contrats.edit', $contrat) }}" class="btn btn-primary btn-sm">Modifier</a>
     </div>
 </div>
 
@@ -161,5 +149,6 @@
 .hero-meta{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);}
 .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);}
 .info-card-title{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-light);}
+.btn-new{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;}
 </style>
 </x-app-layout>

@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <div class="page-title">{{ $team->exists ? 'Modifier l\'équipe' : 'Nouvelle équipe' }}</div>
-    <a href="{{ route('admin.teams.index') }}" class="tb-btn">← Retour</a>
+
 </div>
 
 <div class="list-card" style="max-width:480px;">

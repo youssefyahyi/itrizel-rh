@@ -330,7 +330,7 @@
                 </div>
                 <div class="ws-text">
                     <span class="ws-label">Etablissement</span>
-                    <span class="ws-name">[Etablissement]</span>
+                    <span class="ws-name">{{ App\Models\ParametrageRh::get('societe.nom', config('app.name')) }}</span>
                 </div>
                 <svg class="ws-chev" width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </div>

@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     :title="$mode === 'create' ? 'Nouveau bulletin de paie' : 'Modifier bulletin — '.$bulletin->periode_libelle"
     :breadcrumbs="['Paie' => route('paie.index'), $mode === 'create' ? 'Nouveau' : 'Modifier' => null]">
-    <a href="{{ route('paie.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

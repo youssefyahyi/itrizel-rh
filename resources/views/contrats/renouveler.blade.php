@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     title="Renouveler le contrat"
     :breadcrumbs="['Contrats' => route('contrats.index'), $contratParent->reference => route('contrats.show', $contratParent), 'Renouveler' => null]">
-    <a href="{{ route('contrats.show', $contratParent) }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

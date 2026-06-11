@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     :title="$mode === 'create' ? 'Nouveau contrat' : 'Modifier — '.$contrat->reference"
     :breadcrumbs="['Contrats' => route('contrats.index'), $mode === 'create' ? 'Nouveau' : 'Modifier' => null]">
-    <a href="{{ $mode === 'edit' ? route('contrats.show', $contrat) : route('contrats.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

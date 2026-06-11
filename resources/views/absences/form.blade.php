@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     :title="$mode === 'create' ? 'Nouvelle absence' : 'Modifier l\'absence'"
     :breadcrumbs="['Absences' => route('absences.index'), $mode === 'create' ? 'Nouvelle' : 'Modifier' => null]">
-    <a href="{{ route('absences.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

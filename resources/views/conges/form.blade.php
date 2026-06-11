@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     :title="$mode === 'create' ? 'Nouvelle demande de congé' : 'Modifier congé'"
     :breadcrumbs="['Congés' => route('conges.index'), $mode === 'create' ? 'Nouveau' : 'Modifier' => null]">
-    <a href="{{ route('conges.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

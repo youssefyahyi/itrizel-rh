@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     title="Nouvel avenant"
     :breadcrumbs="['Contrats' => route('contrats.index'), $contrat->reference => route('contrats.show', $contrat), 'Avenant' => null]">
-    <a href="{{ route('contrats.show', $contrat) }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

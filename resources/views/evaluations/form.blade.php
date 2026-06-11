@@ -1,8 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
 <x-rh.page-header
     :title="$mode === 'create' ? 'Nouvelle évaluation' : 'Modifier l\'évaluation — '.$evaluation->type_libelle"
     :breadcrumbs="['Évaluations' => route('evaluations.index'), $mode === 'create' ? 'Nouvelle' : 'Modifier' => null]">
-    <a href="{{ route('evaluations.index') }}" class="tb-btn">← Retour</a>
 </x-rh.page-header>
 
 <div class="content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">

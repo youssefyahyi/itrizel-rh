@@ -21,7 +21,7 @@ $employes_json = $employes->mapWithKeys(fn($e) => [
     <div class="page-title">
         {{ $isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
     </div>
-    <a href="{{ route('admin.users.index') }}" class="tb-btn">← Retour</a>
+
 </div>
 
 <div class="list-card" style="max-width:560px;">
