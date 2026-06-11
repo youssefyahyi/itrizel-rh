@@ -19,6 +19,7 @@ class StoreContratRequest extends FormRequest
             'date_fin'            => ['nullable', 'date', 'after:date_debut'],
             'duree_mois'          => ['nullable', 'integer', 'min:1'],
             'renouvellement_auto' => ['boolean'],
+            'calendrier_conges'   => ['nullable', 'in:ouvrable,calendaire'],
             'observations'        => ['nullable', 'string'],
         ];
     }

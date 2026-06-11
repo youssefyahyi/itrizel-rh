@@ -7,11 +7,20 @@ use App\Http\Requests\UpdateCongeRequest;
 use App\Models\AuditLog;
 use App\Models\Conge;
 use App\Models\Employe;
-use Carbon\Carbon;
+use App\Models\JourFerie;
+use App\Models\ParametrageRh;
 use Illuminate\Http\Request;
 
 class CongeController extends Controller
 {
+    private function formData(): array
+    {
+        return [
+            'calendrier'    => ParametrageRh::get('rh.calendrier_conges', 'ouvrable'),
+            'jours_feries'  => JourFerie::toutesDates(),
+        ];
+    }
+
     private function salarie(): ?\App\Models\User
     {
         $user = auth()->user();
@@ -82,7 +91,7 @@ class CongeController extends Controller
             $employes    = Employe::actifs()->orderBy('nom')->get();
             $preselected = null;
         }
-        return view('conges.form', ['conge' => new Conge, 'mode' => 'create', 'employes' => $employes, 'preselected' => $preselected]);
+        return view('conges.form', $this->formData() + ['conge' => new Conge, 'mode' => 'create', 'employes' => $employes, 'preselected' => $preselected]);
     }
 
     public function store(StoreCongeRequest $request)
@@ -94,9 +103,7 @@ class CongeController extends Controller
             $data['employe_id'] = $sal->employe_id;
         }
 
-        if (empty($data['nb_jours'])) {
-            $data['nb_jours'] = Carbon::parse($data['date_debut'])->diffInDays($data['date_fin']) + 1;
-        }
+        $data['nb_jours'] = Conge::calculerJours($data['date_debut'], $data['date_fin'], $data['employe_id'] ?? null);
 
         $data['statut']     = 'soumis';
         $data['created_by'] = auth()->id();
@@ -132,7 +139,7 @@ class CongeController extends Controller
             $employes    = Employe::actifs()->orderBy('nom')->get();
             $preselected = null;
         }
-        return view('conges.form', ['conge' => $conge, 'mode' => 'edit', 'employes' => $employes, 'preselected' => $preselected]);
+        return view('conges.form', $this->formData() + ['conge' => $conge, 'mode' => 'edit', 'employes' => $employes, 'preselected' => $preselected]);
     }
 
     public function update(UpdateCongeRequest $request, Conge $conge)
@@ -142,6 +149,7 @@ class CongeController extends Controller
         if ($sal = $this->salarie()) {
             $data['employe_id'] = $sal->employe_id;
         }
+        $data['nb_jours'] = Conge::calculerJours($data['date_debut'], $data['date_fin'], $conge->employe_id);
         $conge->update($data);
         return redirect()->route('conges.show', $conge)->with('success', 'Congé mis à jour.');
     }

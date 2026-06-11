@@ -28,6 +28,11 @@ class ParametrageCongesSeeder extends Seeder
              'libelle'     => 'Quotités de travail disponibles (%)',
              'valeur'      => json_encode([100, 80, 75, 50, 25]),
              'description' => 'Liste des quotités proposées dans le formulaire employé. JSON array d\'entiers.'],
+
+            ['groupe' => 'rh', 'cle' => 'rh.calendrier_conges',
+             'libelle'     => 'Calendrier de décompte des congés',
+             'valeur'      => 'ouvrable',
+             'description' => 'ouvrable = lundi-vendredi hors fériés (Code du Travail art. 231) | calendaire = tous les jours hors fériés.'],
         ];
 
         foreach ($params as $p) {

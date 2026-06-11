@@ -19,6 +19,7 @@ class UpdateContratRequest extends FormRequest
             'renouvellement_auto' => ['boolean'],
             'statut'              => ['required', 'in:en_cours,expire,renouvele,resilie,cloture'],
             'motif_resiliation'   => ['nullable', 'string', 'max:255'],
+            'calendrier_conges'   => ['nullable', 'in:ouvrable,calendaire'],
             'observations'        => ['nullable', 'string'],
         ];
     }

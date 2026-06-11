@@ -56,8 +56,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/',            [ParametrageController::class, 'index'])->name('index');
         Route::get('paie',         [ParametrageController::class, 'paie'])->name('paie');
         Route::post('paie',        [ParametrageController::class, 'updatePaie'])->name('paie.update');
-        Route::get('rh',           [ParametrageController::class, 'rh'])->name('rh');
-        Route::post('rh',          [ParametrageController::class, 'updateRh'])->name('rh.update');
+        Route::get('rh',                            [ParametrageController::class, 'rh'])->name('rh');
+        Route::post('rh',                           [ParametrageController::class, 'updateRh'])->name('rh.update');
+        Route::post('jours-feries',                 [ParametrageController::class, 'storeJourFerie'])->name('jours-feries.store');
+        Route::delete('jours-feries/{jourFerie}',   [ParametrageController::class, 'destroyJourFerie'])->name('jours-feries.destroy');
 
         // Organisation
         Route::get('organisation',           [OrganisationController::class, 'index'])->name('organisation.index');

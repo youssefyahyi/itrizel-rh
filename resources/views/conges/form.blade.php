@@ -43,8 +43,8 @@
         <input type="date" name="date_fin" class="form-control @error('date_fin') is-invalid @enderror"
                value="{{ old('date_fin', $conge->date_fin?->format('Y-m-d')) }}" id="dt-fin" onchange="calcJours()">
     </x-rh.form-field>
-    <x-rh.form-field label="Nombre de jours" name="nb_jours" :hint="'Calculé automatiquement'">
-        <input type="number" name="nb_jours" id="nb-jours" class="form-control" value="{{ old('nb_jours', $conge->nb_jours) }}" min="1">
+    <x-rh.form-field label="Nombre de jours" name="nb_jours" :hint="$calendrier === 'ouvrable' ? 'Jours ouvrables, hors fériés' : 'Jours calendaires, hors fériés'">
+        <input type="number" name="nb_jours" id="nb-jours" class="form-control" value="{{ old('nb_jours', $conge->nb_jours) }}" min="1" readonly style="background:var(--surface-soft);cursor:default;">
     </x-rh.form-field>
     @if($mode === 'edit')
     <x-rh.form-field label="Statut" name="statut" :required="true">
@@ -91,13 +91,36 @@ select.form-control{cursor:pointer;}
 .btn-new{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
 </style>
 <script>
+const CALENDRIER = '{{ $calendrier }}';
+const FERIES     = @json($jours_feries);
+
 function calcJours() {
-    var d = document.getElementById('dt-debut').value;
-    var f = document.getElementById('dt-fin').value;
-    if (d && f) {
-        var diff = Math.round((new Date(f) - new Date(d)) / 86400000) + 1;
-        if (diff > 0) document.getElementById('nb-jours').value = diff;
+    var debut = document.getElementById('dt-debut').value;
+    var fin   = document.getElementById('dt-fin').value;
+    if (!debut || !fin) return;
+
+    var start = new Date(debut + 'T00:00:00');
+    var end   = new Date(fin   + 'T00:00:00');
+    if (end < start) return;
+
+    var count  = 0;
+    var cursor = new Date(start);
+
+    while (cursor <= end) {
+        var dow     = cursor.getDay(); // 0=dim, 6=sam
+        var dateStr = cursor.toISOString().split('T')[0];
+        var isWeekend = dow === 0 || dow === 6;
+        var isFerie   = FERIES.includes(dateStr);
+
+        if (CALENDRIER === 'ouvrable') {
+            if (!isWeekend && !isFerie) count++;
+        } else {
+            if (!isFerie) count++;
+        }
+        cursor.setDate(cursor.getDate() + 1);
     }
+
+    if (count > 0) document.getElementById('nb-jours').value = count;
 }
 </script>
 </x-app-layout>

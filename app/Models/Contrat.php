@@ -9,7 +9,7 @@ class Contrat extends Model
 {
     protected $fillable = [
         "employe_id","reference","type","fiche_poste_id","salaire_base",
-        "date_debut","date_fin","duree_mois","renouvellement_auto",
+        "date_debut","date_fin","duree_mois","renouvellement_auto","calendrier_conges",
         "statut","motif_resiliation","observations","created_by",
     ];
 

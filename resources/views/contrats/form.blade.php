@@ -84,6 +84,14 @@
                value="{{ old('duree_mois', $contrat->duree_mois) }}" min="1" placeholder="Ex: 12">
     </x-rh.form-field>
 
+    <x-rh.form-field label="Calendrier congés" name="calendrier_conges" :hint="'Laissez vide pour utiliser le réglage société'">
+        <select name="calendrier_conges" class="form-control">
+            <option value="">— Par défaut société —</option>
+            <option value="ouvrable"   {{ old('calendrier_conges', $contrat->calendrier_conges) === 'ouvrable'   ? 'selected' : '' }}>Jours ouvrables (Lun–Ven)</option>
+            <option value="calendaire" {{ old('calendrier_conges', $contrat->calendrier_conges) === 'calendaire' ? 'selected' : '' }}>Jours calendaires (tous les jours)</option>
+        </select>
+    </x-rh.form-field>
+
     <x-rh.form-field label="Renouvellement automatique" name="renouvellement_auto">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;height:34px;">
             <input type="checkbox" name="renouvellement_auto" value="1" {{ old('renouvellement_auto', $contrat->renouvellement_auto) ? 'checked' : '' }}

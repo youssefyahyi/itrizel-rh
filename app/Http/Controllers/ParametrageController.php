@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\JourFerie;
 use App\Models\ParametrageRh;
 use Illuminate\Http\Request;
 
@@ -30,34 +31,64 @@ class ParametrageController extends Controller
             'rh.conges_jours_par_mois',
             'rh.heures_semaine_base',
             'rh.quotites_disponibles',
+            'rh.calendrier_conges',
         ])->get()->keyBy('cle');
 
-        return view('parametrage.rh', compact('params'));
+        $jours_feries = JourFerie::parAnnee();
+
+        return view('parametrage.rh', compact('params', 'jours_feries'));
     }
 
     /** Enregistre les paramètres RH congés & temps de travail. */
     public function updateRh(Request $request)
     {
-        // Champs simples
         foreach (['rh.conges_jours_par_mois', 'rh.heures_semaine_base'] as $cle) {
             $val = $request->input($cle);
-            if ($val !== null) {
-                ParametrageRh::where('cle', $cle)->update(['valeur' => $val]);
-            }
+            if ($val !== null) ParametrageRh::where('cle', $cle)->update(['valeur' => $val]);
         }
+
+        // Calendrier congés
+        $calendrier = $request->input('rh.calendrier_conges', 'ouvrable');
+        ParametrageRh::set('rh.calendrier_conges', in_array($calendrier, ['ouvrable', 'calendaire']) ? $calendrier : 'ouvrable');
 
         // Quotités — cases à cocher → JSON array
         $quotites = array_map('intval', (array) $request->input('quotites', []));
-        sort($quotites);
-        if (!in_array(100, $quotites)) $quotites[] = 100; // 100% toujours présent
+        if (!in_array(100, $quotites)) $quotites[] = 100;
         sort($quotites);
         ParametrageRh::where('cle', 'rh.quotites_disponibles')
             ->update(['valeur' => json_encode(array_values(array_unique($quotites)))]);
 
         ParametrageRh::clearCache();
 
-        return redirect()->route('parametrage.rh')
-            ->with('success', 'Paramètres congés enregistrés.');
+        return redirect()->route('parametrage.rh')->with('success', 'Paramètres RH enregistrés.');
+    }
+
+    /** Ajoute un jour férié. */
+    public function storeJourFerie(Request $request)
+    {
+        $request->validate([
+            'date'    => 'required|date|unique:jours_feries,date',
+            'libelle' => 'required|string|max:100',
+            'type'    => 'required|in:fixe,variable',
+        ], [
+            'date.unique' => 'Cette date est déjà enregistrée.',
+        ]);
+
+        JourFerie::create([
+            'date'    => $request->date,
+            'libelle' => $request->libelle,
+            'annee'   => (int) date('Y', strtotime($request->date)),
+            'type'    => $request->type,
+        ]);
+
+        return redirect()->route('parametrage.rh')->with('success', 'Jour férié ajouté.');
+    }
+
+    /** Supprime un jour férié. */
+    public function destroyJourFerie(JourFerie $jourFerie)
+    {
+        $jourFerie->delete();
+        return redirect()->route('parametrage.rh')->with('success', 'Jour férié supprimé.');
     }
 
     /** Enregistre les modifications des paramètres paie. */

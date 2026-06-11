@@ -86,9 +86,9 @@
         @forelse($contrats as $c)
         @php $alert = $c->alert_expiration; @endphp
         <tr>
-            <td><span class="mono">{{ $c->reference }}</span></td>
+            <td><a href="{{ route('contrats.show', $c) }}" class="link mono">{{ $c->reference }}</a></td>
             <td>
-                <a href="{{ route('personnel.show', $c->employe) }}" class="link" style="font-weight:500;">{{ $c->employe->nom_complet }}</a>
+                <span style="font-weight:500;color:var(--text-primary);">{{ $c->employe->nom_complet }}</span>
                 <div class="muted">{{ $c->employe->fichePoste?->categorie->nom ?? '—' }}</div>
             </td>
             <td><span class="badge {{ $c->type === 'CDI' ? 'bg' : 'bb' }}">{{ $c->type }}</span></td>
