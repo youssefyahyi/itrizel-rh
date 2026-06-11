@@ -99,7 +99,7 @@
     .nav-icon-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
     .nav-text { display: none; }
     /* Flyout panel */
-    .flyout { position: absolute; left: 60px; top: 0; min-width: 200px; background: var(--sidebar-bg); border: 1px solid rgba(255,255,255,0.07); border-left: none; border-radius: 0 var(--radius) var(--radius) 0; box-shadow: 4px 0 16px rgba(0,0,0,0.35); padding: 10px 0 8px; opacity: 0; visibility: hidden; transition: opacity 0.12s, visibility 0.12s; z-index: 500; pointer-events: none; }
+    .flyout { position: absolute; left: 60px; top: 0; min-width: 200px; max-height: calc(100vh - 16px); overflow-y: auto; background: var(--sidebar-bg); border: 1px solid rgba(255,255,255,0.07); border-left: none; border-radius: 0 var(--radius) var(--radius) 0; box-shadow: 4px 0 16px rgba(0,0,0,0.35); padding: 10px 0 8px; opacity: 0; visibility: hidden; transition: opacity 0.12s, visibility 0.12s; z-index: 500; pointer-events: none; }
     .flyout::before { content:''; position:absolute; left:-8px; top:0; width:8px; height:100%; }
     .nav-group:hover .flyout { opacity: 1; visibility: visible; pointer-events: auto; }
     .flyout-title { padding: 6px 16px 8px; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; }
@@ -405,141 +405,201 @@
 
             <div class="sidebar-nav">
 
-                {{-- Dashboard --}}
-                <div class="nav-group">
-                    <a href="{{ route('dashboard') }}" class="nav-icon-btn {{ request()->routeIs('dashboard') ? 'active' : '' }}" title="Tableau de bord">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span class="nav-text">Tableau de bord</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Principal</div>
-                        <a href="{{ route('dashboard') }}" class="flyout-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Tableau de bord</a>
+                @if(auth()->user()->isSalarie())
+
+                    {{-- ── Menu salarié (fiche personnelle uniquement) ── --}}
+                    @php $empId = auth()->user()->employe_id; @endphp
+
+                    <div class="nav-group">
+                        @if($empId)
+                        <a href="{{ route('personnel.show', $empId) }}" class="nav-icon-btn {{ request()->routeIs('personnel.*') ? 'active' : '' }}" title="Ma fiche">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span class="nav-text">Ma fiche</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Mon profil</div>
+                            <a href="{{ route('personnel.show', $empId) }}" class="flyout-link {{ request()->routeIs('personnel.*') ? 'active' : '' }}">Ma fiche</a>
+                        </div>
+                        @endif
                     </div>
-                </div>
 
-                <div class="nav-sep"></div>
+                    <div class="nav-sep"></div>
 
-                {{-- Personnel --}}
-                <div class="nav-group">
-                    <a href="{{ route('personnel.index') }}" class="nav-icon-btn {{ request()->routeIs('personnel.*') ? 'active' : '' }}" title="Personnel">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        <span class="nav-text">Employés</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Personnel</div>
-                        <a href="{{ route('personnel.index') }}" class="flyout-link {{ request()->routeIs('personnel.*') ? 'active' : '' }}">Employés</a>
+                    <div class="nav-group">
+                        <a href="{{ route('conges.index') }}" class="nav-icon-btn {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Mes congés">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span class="nav-text">Mes congés</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Congés</div>
+                            <a href="{{ route('conges.index') }}" class="flyout-link {{ request()->routeIs('conges.*') ? 'active' : '' }}">Mes demandes</a>
+                        </div>
                     </div>
-                </div>
 
-                {{-- Contrats --}}
-                <div class="nav-group">
-                    <a href="{{ route('contrats.index') }}" class="nav-icon-btn {{ request()->routeIs('contrats.*') ? 'active' : '' }}" title="Contrats">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span class="nav-text">Contrats</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Contrats</div>
-                        <a href="{{ route('contrats.index') }}" class="flyout-link {{ request()->routeIs('contrats.*') ? 'active' : '' }}">Contrats</a>
+                    <div class="nav-group">
+                        <a href="{{ route('formations.index') }}" class="nav-icon-btn {{ request()->routeIs('formations.*') ? 'active' : '' }}" title="Mes formations">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            <span class="nav-text">Formations</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Formation</div>
+                            <a href="{{ route('formations.index') }}" class="flyout-link {{ request()->routeIs('formations.*') ? 'active' : '' }}">Mes formations</a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="nav-sep"></div>
-
-                {{-- Absences --}}
-                <div class="nav-group">
-                    <a href="{{ route('absences.index') }}" class="nav-icon-btn {{ request()->routeIs('absences.*') ? 'active' : '' }}" title="Absences">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                        <span class="nav-text">Absences</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Absences & Temps</div>
-                        <a href="{{ route('absences.index') }}" class="flyout-link {{ request()->routeIs('absences.*') ? 'active' : '' }}">Absences</a>
+                    <div class="nav-group">
+                        <a href="{{ route('evaluations.index') }}" class="nav-icon-btn {{ request()->routeIs('evaluations.*') ? 'active' : '' }}" title="Mes évaluations">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span class="nav-text">Évaluations</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Évaluations</div>
+                            <a href="{{ route('evaluations.index') }}" class="flyout-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">Mes évaluations</a>
+                        </div>
                     </div>
-                </div>
 
-                {{-- Congés --}}
-                <div class="nav-group">
-                    <a href="{{ route('conges.index') }}" class="nav-icon-btn {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Congés">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span class="nav-text">Congés</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Congés</div>
-                        <a href="{{ route('conges.index') }}" class="flyout-link {{ !request()->is('conges*', ['statut'=>'soumis']) && request()->routeIs('conges.*') ? 'active' : '' }}">Congés</a>
-                        <a href="{{ route('conges.index', ['statut' => 'soumis']) }}" class="flyout-link {{ request()->is('conges*') && request()->get('statut') === 'soumis' ? 'active' : '' }}">Approbations</a>
+                @else
+
+                    {{-- ── Menu complet (admin / gestionnaire / lecteur) ── --}}
+
+                    {{-- Dashboard --}}
+                    <div class="nav-group">
+                        <a href="{{ route('dashboard') }}" class="nav-icon-btn {{ request()->routeIs('dashboard') ? 'active' : '' }}" title="Tableau de bord">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <span class="nav-text">Tableau de bord</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Principal</div>
+                            <a href="{{ route('dashboard') }}" class="flyout-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Tableau de bord</a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="nav-sep"></div>
+                    <div class="nav-sep"></div>
 
-                {{-- Paie --}}
-                <div class="nav-group">
-                    <a href="{{ route('paie.index') }}" class="nav-icon-btn {{ request()->routeIs('paie.*') ? 'active' : '' }}" title="Paie">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        <span class="nav-text">Paie</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Rémunération</div>
-                        <a href="{{ route('paie.index') }}" class="flyout-link {{ request()->routeIs('paie.*') && !request()->routeIs('paie.livre') && !request()->routeIs('paie.bordereau') && !request()->routeIs('paie.das') ? 'active' : '' }}">Bulletins de paie</a>
-                        <a href="{{ route('paie.livre') }}" class="flyout-link {{ request()->routeIs('paie.livre') ? 'active' : '' }}">Livre de paie</a>
-                        <a href="{{ route('paie.bordereau') }}" class="flyout-link {{ request()->routeIs('paie.bordereau') ? 'active' : '' }}">Bordereau CNSS/AMO</a>
-                        <a href="{{ route('paie.das') }}" class="flyout-link {{ request()->routeIs('paie.das') ? 'active' : '' }}">DAS</a>
+                    {{-- Personnel --}}
+                    <div class="nav-group">
+                        <a href="{{ route('personnel.index') }}" class="nav-icon-btn {{ request()->routeIs('personnel.*') ? 'active' : '' }}" title="Personnel">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="nav-text">Employés</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Personnel</div>
+                            <a href="{{ route('personnel.index') }}" class="flyout-link {{ request()->routeIs('personnel.*') ? 'active' : '' }}">Employés</a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="nav-sep"></div>
-
-                {{-- Évaluations --}}
-                <div class="nav-group">
-                    <a href="{{ route('evaluations.index') }}" class="nav-icon-btn {{ request()->routeIs('evaluations.*') ? 'active' : '' }}" title="Évaluations">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        <span class="nav-text">Évaluations</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Développement</div>
-                        <a href="{{ route('evaluations.index') }}" class="flyout-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">Évaluations</a>
+                    {{-- Contrats --}}
+                    <div class="nav-group">
+                        <a href="{{ route('contrats.index') }}" class="nav-icon-btn {{ request()->routeIs('contrats.*') ? 'active' : '' }}" title="Contrats">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="nav-text">Contrats</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Contrats</div>
+                            <a href="{{ route('contrats.index') }}" class="flyout-link {{ request()->routeIs('contrats.*') ? 'active' : '' }}">Contrats</a>
+                        </div>
                     </div>
-                </div>
 
-                {{-- Formations --}}
-                <div class="nav-group">
-                    <a href="{{ route('formations.index') }}" class="nav-icon-btn {{ request()->routeIs('formations.*') ? 'active' : '' }}" title="Formations">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        <span class="nav-text">Formations</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Formation</div>
-                        <a href="{{ route('formations.index') }}" class="flyout-link {{ request()->routeIs('formations.*') ? 'active' : '' }}">Formations</a>
+                    <div class="nav-sep"></div>
+
+                    {{-- Absences --}}
+                    <div class="nav-group">
+                        <a href="{{ route('absences.index') }}" class="nav-icon-btn {{ request()->routeIs('absences.*') ? 'active' : '' }}" title="Absences">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            <span class="nav-text">Absences</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Absences & Temps</div>
+                            <a href="{{ route('absences.index') }}" class="flyout-link {{ request()->routeIs('absences.*') ? 'active' : '' }}">Absences</a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="nav-sep"></div>
-
-                {{-- Documents --}}
-                <div class="nav-group">
-                    <a href="{{ route('documents.index') }}" class="nav-icon-btn {{ request()->routeIs('documents.*') ? 'active' : '' }}" title="Documents">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        <span class="nav-text">Documents</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Documents</div>
-                        <a href="{{ route('documents.index') }}" class="flyout-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">Documents</a>
+                    {{-- Congés --}}
+                    <div class="nav-group">
+                        <a href="{{ route('conges.index') }}" class="nav-icon-btn {{ request()->routeIs('conges.*') ? 'active' : '' }}" title="Congés">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span class="nav-text">Congés</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Congés</div>
+                            <a href="{{ route('conges.index') }}" class="flyout-link {{ !request()->is('conges*', ['statut'=>'soumis']) && request()->routeIs('conges.*') ? 'active' : '' }}">Congés</a>
+                            <a href="{{ route('conges.index', ['statut' => 'soumis']) }}" class="flyout-link {{ request()->is('conges*') && request()->get('statut') === 'soumis' ? 'active' : '' }}">Approbations</a>
+                        </div>
                     </div>
-                </div>
 
-                {{-- Paramétrage --}}
-                <div class="nav-group">
-                    <a href="{{ route('parametrage.index') }}" class="nav-icon-btn {{ request()->routeIs('parametrage.*') ? 'active' : '' }}" title="Paramétrage">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                        <span class="nav-text">Paramétrage</span>
-                    </a>
-                    <div class="flyout">
-                        <div class="flyout-title">Paramétrage</div>
-                        <a href="{{ route('parametrage.organisation.index') }}" class="flyout-link {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">Organisation</a>
-                        <a href="{{ route('parametrage.emplois.index') }}" class="flyout-link {{ request()->routeIs('parametrage.emplois.*') ? 'active' : '' }}">Référentiel des emplois</a>
-                        <a href="{{ route('parametrage.paie') }}" class="flyout-link {{ request()->routeIs('parametrage.paie*') ? 'active' : '' }}">Paramètres paie</a>
+                    <div class="nav-sep"></div>
+
+                    {{-- Paie --}}
+                    <div class="nav-group">
+                        <a href="{{ route('paie.index') }}" class="nav-icon-btn {{ request()->routeIs('paie.*') ? 'active' : '' }}" title="Paie">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <span class="nav-text">Paie</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Rémunération</div>
+                            <a href="{{ route('paie.index') }}" class="flyout-link {{ request()->routeIs('paie.*') && !request()->routeIs('paie.livre') && !request()->routeIs('paie.bordereau') && !request()->routeIs('paie.das') ? 'active' : '' }}">Bulletins de paie</a>
+                            <a href="{{ route('paie.livre') }}" class="flyout-link {{ request()->routeIs('paie.livre') ? 'active' : '' }}">Livre de paie</a>
+                            <a href="{{ route('paie.bordereau') }}" class="flyout-link {{ request()->routeIs('paie.bordereau') ? 'active' : '' }}">Bordereau CNSS/AMO</a>
+                            <a href="{{ route('paie.das') }}" class="flyout-link {{ request()->routeIs('paie.das') ? 'active' : '' }}">DAS</a>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="nav-sep"></div>
+
+                    {{-- Évaluations --}}
+                    <div class="nav-group">
+                        <a href="{{ route('evaluations.index') }}" class="nav-icon-btn {{ request()->routeIs('evaluations.*') ? 'active' : '' }}" title="Évaluations">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span class="nav-text">Évaluations</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Développement</div>
+                            <a href="{{ route('evaluations.index') }}" class="flyout-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">Évaluations</a>
+                        </div>
+                    </div>
+
+                    {{-- Formations --}}
+                    <div class="nav-group">
+                        <a href="{{ route('formations.index') }}" class="nav-icon-btn {{ request()->routeIs('formations.*') ? 'active' : '' }}" title="Formations">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            <span class="nav-text">Formations</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Formation</div>
+                            <a href="{{ route('formations.index') }}" class="flyout-link {{ request()->routeIs('formations.*') ? 'active' : '' }}">Formations</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-sep"></div>
+
+                    {{-- Documents --}}
+                    <div class="nav-group">
+                        <a href="{{ route('documents.index') }}" class="nav-icon-btn {{ request()->routeIs('documents.*') ? 'active' : '' }}" title="Documents">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <span class="nav-text">Documents</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Documents</div>
+                            <a href="{{ route('documents.index') }}" class="flyout-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">Documents</a>
+                        </div>
+                    </div>
+
+                    {{-- Paramétrage --}}
+                    <div class="nav-group">
+                        <a href="{{ route('parametrage.index') }}" class="nav-icon-btn {{ request()->routeIs('parametrage.*') ? 'active' : '' }}" title="Paramétrage">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            <span class="nav-text">Paramétrage</span>
+                        </a>
+                        <div class="flyout">
+                            <div class="flyout-title">Paramétrage</div>
+                            <a href="{{ route('parametrage.organisation.index') }}" class="flyout-link {{ request()->routeIs('parametrage.organisation.*') ? 'active' : '' }}">Organisation</a>
+                            <a href="{{ route('parametrage.emplois.index') }}" class="flyout-link {{ request()->routeIs('parametrage.emplois.*') ? 'active' : '' }}">Référentiel des emplois</a>
+                            <a href="{{ route('parametrage.paie') }}" class="flyout-link {{ request()->routeIs('parametrage.paie*') ? 'active' : '' }}">Paramètres paie</a>
+                            <a href="{{ route('parametrage.rh') }}" class="flyout-link {{ request()->routeIs('parametrage.rh*') ? 'active' : '' }}">Paramètres RH</a>
+                        </div>
+                    </div>
+
+                @endif
 
             </div>
 
@@ -586,12 +646,6 @@
                     <span style="margin-left:auto;background:var(--border-light);color:var(--text-muted);font-size:10px;padding:1px 6px;border-radius:10px;">{{ $adminUserCount ?? 0 }}</span>
                 </a>
 
-                <a href="{{ route('admin.teams.index') }}"
-                   style="display:flex;align-items:center;gap:10px;padding:9px 18px;color:{{ request()->routeIs('admin.teams.*') ? 'var(--accent)' : 'var(--text-secondary)' }};font-size:13px;text-decoration:none;background:{{ request()->routeIs('admin.teams.*') ? 'var(--accent-light)' : 'transparent' }};border-radius:6px;margin:1px 8px;transition:background 0.15s;">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Équipes
-                    <span style="margin-left:auto;background:var(--border-light);color:var(--text-muted);font-size:10px;padding:1px 6px;border-radius:10px;">{{ $adminTeamCount ?? 0 }}</span>
-                </a>
 
             </nav>
 
@@ -727,6 +781,23 @@ function mobileToggleSidebar() {
         }
     });
 })();
+// Repositionner les flyouts qui dépassent le bas du viewport
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-group').forEach(function(group) {
+        group.addEventListener('mouseenter', function() {
+            var flyout = group.querySelector('.flyout');
+            if (!flyout) return;
+            flyout.style.top = '0';
+            flyout.style.bottom = 'auto';
+            var rect = group.getBoundingClientRect();
+            var flyH = flyout.scrollHeight;
+            if (rect.top + flyH > window.innerHeight - 8) {
+                flyout.style.top = 'auto';
+                flyout.style.bottom = '0';
+            }
+        });
+    });
+});
 // Fermer le drawer quand on clique un lien nav sur mobile
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar .nav-item, .sidebar .nav-sub-item').forEach(function(el) {

@@ -22,13 +22,13 @@
             </div>
         </a>
 
-        <div class="param-card param-card-disabled">
+        <a href="{{ route('parametrage.rh') }}" class="param-card">
             <div class="param-card-icon">&#9881;&#65039;</div>
             <div>
                 <div class="param-card-title">Paramètres RH</div>
-                <div class="param-card-desc">Types congés, motifs absence, barèmes — à venir</div>
+                <div class="param-card-desc">Congés, quotités de travail, durée légale</div>
             </div>
-        </div>
+        </a>
 
         <a href="{{ route('parametrage.paie') }}" class="param-card">
             <div class="param-card-icon">&#128176;</div>

@@ -23,6 +23,43 @@ class ParametrageController extends Controller
         return view('parametrage.paie', compact('societe', 'cotisations', 'ir', 'baremeParam'));
     }
 
+    /** Page paramétrage RH (congés & temps de travail). */
+    public function rh()
+    {
+        $params = ParametrageRh::whereIn('cle', [
+            'rh.conges_jours_par_mois',
+            'rh.heures_semaine_base',
+            'rh.quotites_disponibles',
+        ])->get()->keyBy('cle');
+
+        return view('parametrage.rh', compact('params'));
+    }
+
+    /** Enregistre les paramètres RH congés & temps de travail. */
+    public function updateRh(Request $request)
+    {
+        // Champs simples
+        foreach (['rh.conges_jours_par_mois', 'rh.heures_semaine_base'] as $cle) {
+            $val = $request->input($cle);
+            if ($val !== null) {
+                ParametrageRh::where('cle', $cle)->update(['valeur' => $val]);
+            }
+        }
+
+        // Quotités — cases à cocher → JSON array
+        $quotites = array_map('intval', (array) $request->input('quotites', []));
+        sort($quotites);
+        if (!in_array(100, $quotites)) $quotites[] = 100; // 100% toujours présent
+        sort($quotites);
+        ParametrageRh::where('cle', 'rh.quotites_disponibles')
+            ->update(['valeur' => json_encode(array_values(array_unique($quotites)))]);
+
+        ParametrageRh::clearCache();
+
+        return redirect()->route('parametrage.rh')
+            ->with('success', 'Paramètres congés enregistrés.');
+    }
+
     /** Enregistre les modifications des paramètres paie. */
     public function updatePaie(Request $request)
     {

@@ -12,9 +12,23 @@ class PersonnelController extends Controller
 {
     use HasFicheData;
 
+    private function abortIfSalarie(): void
+    {
+        if (auth()->user()->isSalarie()) abort(403);
+    }
+
+    private function scopeSalarie(Employe $employe): void
+    {
+        $user = auth()->user();
+        if ($user->isSalarie() && $user->employe_id !== $employe->id) {
+            abort(403);
+        }
+    }
+
     // ── Liste ──────────────────────────────────────────────────────
     public function index(Request $request)
     {
+        $this->abortIfSalarie();
         $query = Employe::with(["contratActif", "fichePoste"])->orderBy("nom");
 
         if ($request->filled("q")) {
@@ -50,6 +64,7 @@ class PersonnelController extends Controller
     // ── Formulaire création ────────────────────────────────────────
     public function create()
     {
+        $this->abortIfSalarie();
         [$fiches, $categories] = $this->ficheData();
         return view("personnel.form", ["employe" => new Employe, "mode" => "create",
             "fiches" => $fiches, "categories" => $categories]);
@@ -58,6 +73,7 @@ class PersonnelController extends Controller
     // ── Enregistrement ─────────────────────────────────────────────
     public function store(StoreEmployeRequest $request)
     {
+        $this->abortIfSalarie();
         $data = $request->validated();
         $data["created_by"]  = auth()->id();
         $data["matricule"]   = Employe::generateMatricule();
@@ -78,21 +94,24 @@ class PersonnelController extends Controller
     // ── Détail ─────────────────────────────────────────────────────
     public function show(Employe $employe)
     {
+        $this->scopeSalarie($employe);
         $employe->load([
             "fichePoste",
             "contrats"      => fn($q) => $q->latest(),
             "conges"        => fn($q) => $q->latest()->limit(5),
             "bulletinsPaie" => fn($q) => $q->latest()->limit(5),
         ]);
-        $auditLogs = AuditLog::where("module", "Personnel")
+        $auditLogs  = AuditLog::where("module", "Personnel")
                         ->where("description", "like", "%{$employe->matricule}%")
                         ->latest()->limit(20)->with("user")->get();
-        return view("personnel.show", compact("employe", "auditLogs"));
+        $isSalarie  = auth()->user()->isSalarie();
+        return view("personnel.show", compact("employe", "auditLogs", "isSalarie"));
     }
 
     // ── Formulaire édition ─────────────────────────────────────────
     public function edit(Employe $employe)
     {
+        $this->abortIfSalarie();
         [$fiches, $categories] = $this->ficheData();
         return view("personnel.form", ["employe" => $employe, "mode" => "edit",
             "fiches" => $fiches, "categories" => $categories]);
@@ -101,6 +120,7 @@ class PersonnelController extends Controller
     // ── Mise à jour ────────────────────────────────────────────────
     public function update(UpdateEmployeRequest $request, Employe $employe)
     {
+        $this->abortIfSalarie();
         $data = $request->validated();
 
         if ($request->hasFile("photo")) {
@@ -119,6 +139,7 @@ class PersonnelController extends Controller
     // ── Suppression (soft delete) ──────────────────────────────────
     public function destroy(Employe $employe)
     {
+        $this->abortIfSalarie();
         AuditLog::log("Personnel", "suppression", "Suppression de l employé {$employe->nom_complet}", $employe);
         $employe->delete();
 

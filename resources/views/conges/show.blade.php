@@ -19,8 +19,9 @@
             </h1>
             <div style="font-size:13px;color:var(--text-muted);">{{ $conge->date_debut->format('d/m/Y') }} → {{ $conge->date_fin->format('d/m/Y') }} — {{ $conge->nb_jours }} jour(s)</div>
         </div>
+        @php $isSalarie = auth()->user()->isSalarie(); @endphp
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            @if(in_array($conge->statut, ['soumis','en_validation']))
+            @if(!$isSalarie && in_array($conge->statut, ['soumis','en_validation']))
             <form method="POST" action="{{ route('conges.approuver',$conge) }}">@csrf @method('PATCH')
                 <button type="submit" class="btn btn-success btn-sm">✓ Approuver</button>
             </form>
@@ -28,7 +29,9 @@
                 <button type="submit" class="btn btn-danger btn-sm">✗ Rejeter</button>
             </form>
             @endif
+            @if(!$isSalarie)
             <a href="{{ route('conges.edit',$conge) }}" class="btn btn-outline btn-sm">Modifier</a>
+            @endif
         </div>
     </div>
 </div>
@@ -94,15 +97,19 @@
         <div class="card" style="padding:16px;">
             <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Actions</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
-                @if(in_array($conge->statut,['soumis','en_validation']))
+                @if(!$isSalarie && in_array($conge->statut,['soumis','en_validation']))
                 <form method="POST" action="{{ route('conges.approuver',$conge) }}">@csrf @method('PATCH')<button type="submit" class="tb-btn" style="width:100%;justify-content:flex-start;font-size:12px;color:var(--success);">✓ Approuver</button></form>
                 <form method="POST" action="{{ route('conges.rejeter',$conge) }}">@csrf @method('PATCH')<button type="submit" class="tb-btn" style="width:100%;justify-content:flex-start;font-size:12px;color:var(--danger);">✗ Rejeter</button></form>
                 @endif
+                @if(!$isSalarie)
                 <a href="{{ route('conges.edit',$conge) }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">Modifier</a>
-                <form method="POST" action="{{ route('conges.destroy',$conge) }}" onsubmit="return confirm('Supprimer ?')">
+                @endif
+                @if(!$isSalarie || $conge->statut === 'soumis')
+                <form method="POST" action="{{ route('conges.destroy',$conge) }}" onsubmit="return confirm('Supprimer cette demande ?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="tb-btn" style="width:100%;justify-content:flex-start;font-size:12px;color:var(--danger);">Supprimer</button>
                 </form>
+                @endif
             </div>
         </div>
     </div>

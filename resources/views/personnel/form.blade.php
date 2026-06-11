@@ -40,6 +40,14 @@
                max="{{ date('Y-m-d') }}"
                value="{{ old('date_naissance', $employe->date_naissance?->format('Y-m-d')) }}">
     </x-rh.form-field>
+    <x-rh.form-field label="Lieu de naissance" name="lieu_naissance">
+        <input type="text" name="lieu_naissance" class="form-control @error('lieu_naissance') is-invalid @enderror"
+               value="{{ old('lieu_naissance', $employe->lieu_naissance) }}" placeholder="Ville de naissance">
+    </x-rh.form-field>
+    <x-rh.form-field label="Nationalité" name="nationalite">
+        <input type="text" name="nationalite" class="form-control @error('nationalite') is-invalid @enderror"
+               value="{{ old('nationalite', $employe->nationalite) }}" placeholder="Ex: Marocaine">
+    </x-rh.form-field>
     <x-rh.form-field label="Sexe" name="sexe" :required="true">
         <select name="sexe" class="form-control @error('sexe') is-invalid @enderror">
             <option value="">— Choisir —</option>
@@ -95,6 +103,21 @@
         <input type="date" name="date_embauche" class="form-control @error('date_embauche') is-invalid @enderror"
                max="{{ date('Y-m-d') }}"
                value="{{ old('date_embauche', $employe->date_embauche?->format('Y-m-d')) }}">
+    </x-rh.form-field>
+    <x-rh.form-field label="Quotité de travail" name="quotite_travail" :required="true">
+        <select name="quotite_travail" class="form-control @error('quotite_travail') is-invalid @enderror">
+            @foreach([100, 80, 75, 50, 25] as $q)
+            <option value="{{ $q }}" {{ (int)old('quotite_travail', $employe->quotite_travail ?? 100) === $q ? 'selected' : '' }}>
+                {{ $q }} %{{ $q === 100 ? ' (temps plein)' : '' }}
+            </option>
+            @endforeach
+        </select>
+    </x-rh.form-field>
+    <x-rh.form-field label="Heures / semaine" name="heures_semaine" :required="true">
+        <input type="number" name="heures_semaine" step="0.5" min="1" max="60"
+               class="form-control @error('heures_semaine') is-invalid @enderror"
+               value="{{ old('heures_semaine', $employe->heures_semaine ?? 44) }}">
+        <div class="form-hint">Durée légale Maroc : 44 h/semaine (Art. 184 C.T.)</div>
     </x-rh.form-field>
     <x-rh.form-field label="Diplôme" name="diplome">
         <input type="text" name="diplome" class="form-control @error('diplome') is-invalid @enderror"

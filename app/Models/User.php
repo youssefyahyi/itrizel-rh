@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -20,7 +21,7 @@ class User extends Authenticatable
         'actif',
         'last_login_at',
         'telephone',
-        'team_id',
+        'employe_id',
     ];
 
     protected $hidden = [
@@ -38,28 +39,24 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
+    public function isAdmin(): bool      { return $this->role === 'admin'; }
+    public function isLecteur(): bool    { return $this->role === 'lecteur'; }
+    public function isSalarie(): bool    { return $this->role === 'salarie'; }
+    public function isGestionnaire(): bool { return $this->role === 'gestionnaire'; }
 
-    public function isLecteur(): bool
+    public function employe(): BelongsTo
     {
-        return $this->role === 'lecteur';
-    }
-
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(\App\Models\Employe::class, 'employe_id');
     }
 
     public function getRoleLabelAttribute(): string
     {
         return match($this->role) {
-            'admin'       => 'Administrateur',
-            'gestionnaire'=> 'Gestionnaire',
-            'lecteur'     => 'Lecteur',
-            default       => $this->role,
+            'admin'        => 'Administrateur',
+            'gestionnaire' => 'Gestionnaire',
+            'lecteur'      => 'Lecteur',
+            'salarie'      => 'Salarié',
+            default        => $this->role,
         };
     }
 }

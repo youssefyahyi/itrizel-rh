@@ -2,9 +2,14 @@
 
 {{-- BREADCRUMB --}}
 <div style="display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid var(--border-light);background:var(--surface);">
+    @if(!$isSalarie)
     <a href="{{ route('personnel.index') }}" style="color:var(--text-muted);text-decoration:none;font-size:13px;">Personnel</a>
     <span style="color:var(--text-muted);">›</span>
+    @endif
     <span style="font-size:13px;color:var(--text-primary);font-weight:500;">{{ $employe->nom_complet }}</span>
+    @if($isSalarie)
+    <span style="margin-left:6px;font-size:11px;color:var(--text-muted);background:var(--border-light);padding:2px 8px;border-radius:10px;">Lecture seule</span>
+    @endif
 </div>
 
 @if(session('success'))
@@ -35,6 +40,7 @@
                 <div style="font-size:13px;color:var(--text-muted);">{{ $employe->fichePoste?->poste->nom ?? '—' }} — <span class="mono" style="font-size:12px;">{{ $employe->matricule }}</span></div>
             </div>
         </div>
+        @if(!$isSalarie)
         <div style="display:flex;gap:8px;flex-shrink:0;">
             <form method="POST" action="{{ route('personnel.toggle-statut', $employe) }}">
                 @csrf @method('PATCH')
@@ -44,6 +50,7 @@
             </form>
             <a href="{{ route('personnel.edit', $employe) }}" class="btn btn-primary btn-sm">Modifier</a>
         </div>
+        @endif
     </div>
 </div>
 
@@ -94,6 +101,14 @@
                         <span class="info-value inline-field" data-field="date_naissance" data-type="date" data-value="{{ $employe->date_naissance?->format('Y-m-d') }}">{{ $employe->date_naissance?->format('d/m/Y') ?? '—' }}</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Lieu de naissance</span>
+                        <span class="info-value inline-field" data-field="lieu_naissance" data-type="text">{{ $employe->lieu_naissance ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nationalité</span>
+                        <span class="info-value inline-field" data-field="nationalite" data-type="text">{{ $employe->nationalite ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Sexe</span>
                         <span class="info-value inline-field" data-field="sexe" data-type="select" data-value="{{ $employe->sexe }}" data-options='{"M":"Masculin","F":"Féminin"}'>{{ $employe->sexe === 'M' ? 'Masculin' : 'Féminin' }}</span>
                     </div>
@@ -111,7 +126,7 @@
             <div class="card" style="margin-top:16px;">
                 <div class="card-header">
                     <span class="card-title">Poste & Affectation</span>
-                    <a href="{{ route('personnel.edit', $employe) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Modifier</a>
+                    @if(!$isSalarie)<a href="{{ route('personnel.edit', $employe) }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Modifier</a>@endif
                 </div>
                 <div style="padding:4px 20px;">
                     <div class="info-row">
@@ -133,6 +148,14 @@
                         <span class="info-value inline-field" data-field="date_embauche" data-type="date" data-value="{{ $employe->date_embauche?->format('Y-m-d') }}">{{ $employe->date_embauche?->format('d/m/Y') ?? '—' }}</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Quotité de travail</span>
+                        <span class="info-value inline-field" data-field="quotite_travail" data-type="select" data-value="{{ (int)$employe->quotite_travail }}" data-options='{"100":"100 % (temps plein)","80":"80 %","75":"75 %","50":"50 %","25":"25 %"}'>{{ (int)$employe->quotite_travail }} %</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Heures / semaine</span>
+                        <span class="info-value inline-field" data-field="heures_semaine" data-type="number">{{ (float)$employe->heures_semaine }} h</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Diplôme</span>
                         <span class="info-value inline-field" data-field="diplome" data-type="text">{{ $employe->diplome ?? '—' }}</span>
                     </div>
@@ -151,6 +174,10 @@
                     <div class="info-row">
                         <span class="info-label">Ville</span>
                         <span class="info-value inline-field" data-field="ville" data-type="text">{{ $employe->ville ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Adresse</span>
+                        <span class="info-value inline-field" data-field="adresse" data-type="text">{{ $employe->adresse ?? '—' }}</span>
                     </div>
                 </div>
             </div>
@@ -183,7 +210,7 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Historique des contrats</span>
-                    <a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau contrat</a>
+                    @if(!$isSalarie)<a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau contrat</a>@endif
                 </div>
                 @forelse($employe->contrats as $contrat)
                 <a href="{{ route('contrats.show', $contrat) }}" class="related-item" style="text-decoration:none;">
@@ -206,6 +233,24 @@
 
         {{-- ONGLET CONGÉS --}}
         <div class="tab-pane" id="tab-conges">
+            {{-- Compteurs solde --}}
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Acquis {{ now()->year }}</div>
+                    <div style="font-size:22px;font-weight:700;color:var(--accent);">{{ $employe->solde_conges_acquis }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">jours</div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Pris {{ now()->year }}</div>
+                    <div style="font-size:22px;font-weight:700;color:var(--text-primary);">{{ $employe->solde_conges_pris }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">jours</div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid {{ $employe->solde_conges_restant > 0 ? 'var(--success)' : 'var(--danger)' }};border-radius:var(--radius);padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Solde restant</div>
+                    <div style="font-size:22px;font-weight:700;color:{{ $employe->solde_conges_restant > 0 ? 'var(--success)' : 'var(--danger)' }};">{{ $employe->solde_conges_restant }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">jours · quotité {{ (int)$employe->quotite_travail }} %</div>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Derniers congés</span>
@@ -238,18 +283,18 @@
                     <a href="{{ route('paie.index') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">Voir tout</a>
                 </div>
                 @forelse($employe->bulletinsPaie as $bulletin)
-                <div class="related-item">
+                <a href="{{ route('paie.show', $bulletin) }}" class="related-item" style="text-decoration:none;">
                     <div class="related-item-left">
                         <div class="related-icon" style="background:var(--success-light);color:var(--success);">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
                         <div>
-                            <div class="related-name">{{ $bulletin->mois ?? ($bulletin->periode ?? $bulletin->created_at->format('m/Y')) }}</div>
-                            <div class="related-sub">Net : {{ number_format($bulletin->salaire_net ?? $bulletin->net_a_payer ?? 0, 0, ',', ' ') }} DH</div>
+                            <div class="related-name">{{ $bulletin->periode_libelle }}</div>
+                            <div class="related-sub">Net : {{ number_format($bulletin->net_a_payer, 0, ',', ' ') }} DH — Brut : {{ number_format($bulletin->brut, 0, ',', ' ') }} DH</div>
                         </div>
                     </div>
-                    <span class="badge bg">Généré</span>
-                </div>
+                    <span class="badge {{ $bulletin->statut_badge }}">{{ $bulletin->statut_libelle }}</span>
+                </a>
                 @empty
                 <div class="empty-state">Aucun bulletin de paie.</div>
                 @endforelse
@@ -287,7 +332,7 @@
                     <svg width="13" height="13" fill="none" stroke="var(--accent)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     Contrat actif
                 </span>
-                <a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau</a>
+                @if(!$isSalarie)<a href="{{ route('contrats.create') }}?employe_id={{ $employe->id }}" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500;">+ Nouveau</a>@endif
             </div>
             @php $ca = $employe->contrats->where('statut','en_cours')->first(); @endphp
             @if($ca)
@@ -330,8 +375,22 @@
                     <span style="font-weight:600;color:var(--accent);">{{ $employe->contrats->count() }}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:13px;">
-                    <span style="color:var(--text-muted);">Congés pris</span>
-                    <span style="font-weight:600;color:var(--text-primary);">{{ $employe->conges->where('statut','approuve')->count() }}</span>
+                    <span style="color:var(--text-muted);">Quotité</span>
+                    <span style="font-weight:600;color:var(--text-primary);">{{ (int)$employe->quotite_travail }} %</span>
+                </div>
+                <div style="height:1px;background:var(--border-light);margin:4px 0;"></div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Congés {{ now()->year }}</div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                    <span style="color:var(--text-muted);">Acquis</span>
+                    <span style="font-weight:600;color:var(--accent);">{{ $employe->solde_conges_acquis }} j</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                    <span style="color:var(--text-muted);">Pris</span>
+                    <span style="font-weight:600;color:var(--text-primary);">{{ $employe->solde_conges_pris }} j</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:4px;border-top:1px solid var(--border-light);">
+                    <span style="color:var(--text-muted);">Solde restant</span>
+                    <span style="font-weight:700;color:{{ $employe->solde_conges_restant > 0 ? 'var(--success)' : 'var(--danger)' }};">{{ $employe->solde_conges_restant }} j</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:13px;">
                     <span style="color:var(--text-muted);">Créé le</span>
@@ -340,6 +399,7 @@
             </div>
         </div>
 
+        @if(!$isSalarie)
         {{-- Actions rapides --}}
         <div class="card" style="padding:16px;">
             <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Actions</div>
@@ -365,9 +425,26 @@
                 </form>
             </div>
         </div>
+        @else
+        {{-- Raccourcis salarié --}}
+        <div class="card" style="padding:16px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Accès rapide</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <a href="{{ route('conges.index') }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Mes congés
+                </a>
+                <a href="{{ route('formations.index') }}" class="tb-btn" style="justify-content:flex-start;font-size:12px;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    Mes formations
+                </a>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
+@if(!$isSalarie)
 {{-- BANDEAU MODIFICATIONS --}}
 <div id="rh-unsaved-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:#1E293B;color:white;padding:14px 24px;align-items:center;justify-content:space-between;box-shadow:0 -4px 20px rgba(0,0,0,0.2);">
     <div style="display:flex;align-items:center;gap:10px;">
@@ -420,6 +497,7 @@
 </style>
 
 <script>
+@if(!$isSalarie)
 (function() {
     var ROUTE = "{{ route('personnel.update', $employe) }}";
     var TOKEN = "{{ csrf_token() }}";
@@ -432,15 +510,20 @@
         prenom:            "{{ addslashes($employe->prenom) }}",
         cin:               "{{ $employe->cin }}",
         date_naissance:    "{{ $employe->date_naissance?->format('Y-m-d') }}",
+        lieu_naissance:    "{{ addslashes($employe->lieu_naissance ?? '') }}",
+        nationalite:       "{{ addslashes($employe->nationalite ?? '') }}",
         sexe:              "{{ $employe->sexe }}",
         situation_familiale: "{{ $employe->situation_familiale }}",
         nombre_enfants:    "{{ $employe->nombre_enfants }}",
+        quotite_travail:   "{{ (int)$employe->quotite_travail }}",
+        heures_semaine:    "{{ (float)$employe->heures_semaine }}",
         date_embauche:     "{{ $employe->date_embauche->format('Y-m-d') }}",
         diplome:           "{{ addslashes($employe->diplome ?? '') }}",
         specialite:        "{{ addslashes($employe->specialite ?? '') }}",
         email:             "{{ $employe->email ?? '' }}",
         telephone:         "{{ $employe->telephone ?? '' }}",
         ville:             "{{ addslashes($employe->ville ?? '') }}",
+        adresse:           "{{ addslashes($employe->adresse ?? '') }}",
         banque:            "{{ addslashes($employe->banque ?? '') }}",
         rib:               "{{ $employe->rib ?? '' }}",
         numero_cnss:       "{{ $employe->numero_cnss ?? '' }}",
@@ -579,6 +662,9 @@
         }
     }
 })();
+@endif
 </script>
+
+@endif {{-- !isSalarie (unsaved bar) --}}
 
 </x-app-layout>

@@ -15,13 +15,15 @@ class Employe extends Model
         "nationalite","sexe","email","telephone","adresse","ville","photo",
         "diplome","specialite","fiche_poste_id","date_embauche",
         "rib","banque","numero_cnss","numero_amo","nombre_enfants",
-        "situation_familiale","statut","created_by",
+        "situation_familiale","quotite_travail","heures_semaine","statut","created_by",
         "manager_id","unite_id",
     ];
 
     protected $casts = [
-        "date_naissance" => "date",
-        "date_embauche"  => "date",
+        "date_naissance"  => "date",
+        "date_embauche"   => "date",
+        "quotite_travail" => "decimal:2",
+        "heures_semaine"  => "decimal:2",
     ];
 
     // ── Accessors ──────────────────────────────────────────────────
@@ -38,6 +40,31 @@ class Employe extends Model
             "suspendu"  => "by",
             default     => "bgr",
         };
+    }
+
+    // ── Congés — compteurs ─────────────────────────────────────────
+    public function getSoldeCongesAcquisAttribute(): float
+    {
+        if (!$this->date_embauche) return 0.0;
+        $joursParMois   = (float) ParametrageRh::get('rh.conges_jours_par_mois', '1.5');
+        $debutExercice  = now()->startOfYear();
+        $debutCompte    = $this->date_embauche->gt($debutExercice) ? $this->date_embauche : $debutExercice;
+        $mois           = (int) $debutCompte->diffInMonths(now());
+        return round($mois * $joursParMois * ((float)$this->quotite_travail / 100), 1);
+    }
+
+    public function getSoldeCongesPrisAttribute(): float
+    {
+        return (float) $this->conges()
+            ->where('type_conge', 'annuel')
+            ->where('statut', 'approuve')
+            ->whereYear('date_debut', now()->year)
+            ->sum('nb_jours');
+    }
+
+    public function getSoldeCongesRestantAttribute(): float
+    {
+        return max(0.0, $this->solde_conges_acquis - $this->solde_conges_pris);
     }
 
     // ── Scopes ─────────────────────────────────────────────────────

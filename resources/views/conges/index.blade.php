@@ -1,14 +1,42 @@
 ﻿<x-app-layout>
 <div class="page-header">
-    <div class="page-title">Conges <span class="badge-count">{{ $stats['en_attente'] }}</span></div>
+    <div class="page-title">
+        @if($isSalarie) Mes congés @else Congés <span class="badge-count">{{ $stats['en_attente'] }}</span> @endif
+    </div>
     <a href="{{ route('conges.create') }}" class="btn-new">+ Nouvelle demande</a>
 </div>
+
+@if($isSalarie && $soldeSalarie)
+{{-- ── Bandeau solde salarié ── --}}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 24px 0;">
+    <div class="stat-card" style="--st:var(--accent);">
+        <div class="stat-icon" style="background:var(--accent-light);">
+            <svg width="16" height="16" fill="none" stroke="var(--accent)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div><div class="stat-label">Acquis {{ now()->year }}</div><div class="stat-value" style="color:var(--accent);">{{ $soldeSalarie['acquis'] }}<span style="font-size:13px;font-weight:400;margin-left:3px;">j</span></div></div>
+    </div>
+    <div class="stat-card" style="--st:var(--text-secondary);">
+        <div class="stat-icon" style="background:var(--border-light);">
+            <svg width="16" height="16" fill="none" stroke="var(--text-secondary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <div><div class="stat-label">Pris {{ now()->year }}</div><div class="stat-value">{{ $soldeSalarie['pris'] }}<span style="font-size:13px;font-weight:400;margin-left:3px;">j</span></div></div>
+    </div>
+    <div class="stat-card" style="--st:{{ $soldeSalarie['restant'] > 0 ? 'var(--success)' : 'var(--danger)' }};">
+        <div class="stat-icon" style="background:{{ $soldeSalarie['restant'] > 0 ? 'var(--success-light)' : 'var(--danger-light)' }};">
+            <svg width="16" height="16" fill="none" stroke="{{ $soldeSalarie['restant'] > 0 ? 'var(--success)' : 'var(--danger)' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div><div class="stat-label">Solde restant</div><div class="stat-value" style="color:{{ $soldeSalarie['restant'] > 0 ? 'var(--success)' : 'var(--danger)' }};">{{ $soldeSalarie['restant'] }}<span style="font-size:13px;font-weight:400;margin-left:3px;">j</span></div></div>
+    </div>
+</div>
+@else
+{{-- ── Stats gestionnaire ── --}}
 <div class="stats-row">
     <div class="stat-card" style="--st:var(--warning);"><div class="stat-icon" style="background:var(--warning-light);"><svg width="16" height="16" fill="none" stroke="var(--warning)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><div class="stat-label">En attente</div><div class="stat-value" style="color:var(--warning);">{{ $stats['en_attente'] }}</div></div></div>
-    <div class="stat-card" style="--st:var(--success);"><div class="stat-icon" style="background:var(--success-light);"><svg width="16" height="16" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><div class="stat-label">Approuves ce mois</div><div class="stat-value" style="color:var(--success);">{{ $stats['approuves'] }}</div></div></div>
-    <div class="stat-card" style="--st:var(--danger);"><div class="stat-icon" style="background:var(--danger-light);"><svg width="16" height="16" fill="none" stroke="var(--danger)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><div class="stat-label">Rejetes ce mois</div><div class="stat-value" style="color:var(--danger);">{{ $stats['rejetes'] }}</div></div></div>
+    <div class="stat-card" style="--st:var(--success);"><div class="stat-icon" style="background:var(--success-light);"><svg width="16" height="16" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><div class="stat-label">Approuvés ce mois</div><div class="stat-value" style="color:var(--success);">{{ $stats['approuves'] }}</div></div></div>
+    <div class="stat-card" style="--st:var(--danger);"><div class="stat-icon" style="background:var(--danger-light);"><svg width="16" height="16" fill="none" stroke="var(--danger)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><div class="stat-label">Rejetés ce mois</div><div class="stat-value" style="color:var(--danger);">{{ $stats['rejetes'] }}</div></div></div>
     <div class="stat-card" style="--st:var(--accent);"><div class="stat-icon" style="background:var(--accent-light);"><svg width="16" height="16" fill="none" stroke="var(--accent)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><div><div class="stat-label">Jours pris ce mois</div><div class="stat-value" style="color:var(--accent);">{{ $stats['jours_mois'] }}</div></div></div>
 </div>
+@endif
 @if(session('success'))<div class="alert alert-success" style="margin:16px 24px 0;">{{ session('success') }}</div>@endif
 <div class="list-card">
     <form method="GET" action="{{ route('conges.index') }}" id="f-conges">
@@ -34,14 +62,17 @@
     </form>
     <div class="table-wrap"><table>
         <thead><tr>
-            <th><span class="th-in">Employe</span></th><th><span class="th-in">Type</span></th>
+            @if(!$isSalarie)<th><span class="th-in">Employé</span></th>@endif
+            <th><span class="th-in">Type</span></th>
             <th><span class="th-in">Du</span></th><th><span class="th-in">Au</span></th>
             <th class="tc"><span class="th-in">Jours</span></th><th class="tc"><span class="th-in">Statut</span></th><th class="tc"></th>
         </tr></thead>
         <tbody>
         @forelse($conges as $c)
         <tr>
+            @if(!$isSalarie)
             <td><a href="{{ route('personnel.show',$c->employe) }}" class="link" style="font-weight:500;">{{ $c->employe->nom_complet }}</a></td>
+            @endif
             <td><span class="badge bb">{{ $c->type_conge_libelle }}</span></td>
             <td class="muted">{{ $c->date_debut->format('d/m/Y') }}</td>
             <td class="muted">{{ $c->date_fin->format('d/m/Y') }}</td>
@@ -49,10 +80,10 @@
             <td class="tc"><span class="badge {{ $c->statut_badge }}"><span class="dot"></span>{{ $c->statut_libelle }}</span></td>
             <td class="tc" style="white-space:nowrap;">
                 <a href="{{ route('conges.show',$c) }}" class="tb-btn" title="Voir"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
-                @if(in_array($c->statut,['soumis','en_validation']))<form method="POST" action="{{ route('conges.approuver',$c) }}" style="display:inline;">@csrf @method('PATCH')<button type="submit" class="tb-btn" style="color:var(--success);" title="Approuver">✓</button></form>@endif
+                @if(!$isSalarie && in_array($c->statut,['soumis','en_validation']))<form method="POST" action="{{ route('conges.approuver',$c) }}" style="display:inline;">@csrf @method('PATCH')<button type="submit" class="tb-btn" style="color:var(--success);" title="Approuver">✓</button></form>@endif
             </td>
         </tr>
-        @empty<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">Aucun conge.</td></tr>@endforelse
+        @empty<tr><td colspan="{{ $isSalarie ? 6 : 7 }}" style="text-align:center;color:var(--text-muted);padding:40px;">Aucune demande.</td></tr>@endforelse
         </tbody>
     </table></div>
     <x-pagination :paginator="$conges" singular="conge" plural="conges" />

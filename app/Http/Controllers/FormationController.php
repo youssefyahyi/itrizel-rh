@@ -11,9 +11,26 @@ use Illuminate\Http\Request;
 
 class FormationController extends Controller
 {
+    private function salarie(): ?\App\Models\User
+    {
+        $user = auth()->user();
+        return $user->isSalarie() ? $user : null;
+    }
+
+    private function checkOwnership(Formation $formation): void
+    {
+        if ($sal = $this->salarie()) {
+            if ($formation->employe_id !== $sal->employe_id) abort(403);
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Formation::with('employe')->latest();
+
+        if ($sal = $this->salarie()) {
+            $query->where('employe_id', $sal->employe_id);
+        }
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -43,12 +60,14 @@ class FormationController extends Controller
 
     public function create()
     {
+        if ($this->salarie()) abort(403);
         $employes = Employe::actifs()->orderBy('nom')->get();
         return view('formations.form', ['formation' => new Formation, 'mode' => 'create', 'employes' => $employes]);
     }
 
     public function store(StoreFormationRequest $request)
     {
+        if ($this->salarie()) abort(403);
         $data = $request->validated();
         $data['statut']     = 'planifie';
         $data['cout']       = $data['cout'] ?? 0;
@@ -63,24 +82,28 @@ class FormationController extends Controller
 
     public function show(Formation $formation)
     {
+        $this->checkOwnership($formation);
         $formation->load('employe');
         return view('formations.show', compact('formation'));
     }
 
     public function edit(Formation $formation)
     {
+        if ($this->salarie()) abort(403);
         $employes = Employe::actifs()->orderBy('nom')->get();
         return view('formations.form', ['formation' => $formation, 'mode' => 'edit', 'employes' => $employes]);
     }
 
     public function update(UpdateFormationRequest $request, Formation $formation)
     {
+        if ($this->salarie()) abort(403);
         $formation->update($request->validated());
         return redirect()->route('formations.show', $formation)->with('success', 'Formation mise à jour.');
     }
 
     public function destroy(Formation $formation)
     {
+        if ($this->salarie()) abort(403);
         $formation->delete();
         return redirect()->route('formations.index')->with('success', 'Formation supprimée.');
     }

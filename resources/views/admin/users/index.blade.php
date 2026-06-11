@@ -6,10 +6,6 @@
         <span class="badge-count">{{ $users->count() }}</span>
     </div>
     <div style="display:flex;gap:8px;">
-        <a href="{{ route('admin.teams.index') }}" class="tb-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Équipes
-        </a>
         <a href="{{ route('admin.users.create') }}" class="btn-new">
             <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             Nouvel utilisateur
@@ -32,7 +28,7 @@
                 <th><span class="th-in">Nom</span></th>
                 <th><span class="th-in">Email</span></th>
                 <th><span class="th-in">Rôle</span></th>
-                <th><span class="th-in">Équipe</span></th>
+                <th><span class="th-in">Employé lié</span></th>
                 <th class="tc"><span class="th-in">Statut</span></th>
                 <th><span class="th-in">Dernière connexion</span></th>
                 <th class="tc"><span class="th-in">Actions</span></th>
@@ -53,18 +49,17 @@
                     $roleClass = match($user->role) {
                         'admin'        => 'br',
                         'gestionnaire' => 'bb',
-                        'lecteur'      => 'bgr',
+                        'salarie'      => 'bpu',
                         default        => 'bgr',
                     };
                 @endphp
                 <span class="badge {{ $roleClass }}">{{ $user->role_label }}</span>
             </td>
             <td>
-                @if($user->team)
-                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);">
-                        <span style="width:8px;height:8px;border-radius:50%;background:{{ $user->team->couleur }};flex-shrink:0;"></span>
-                        {{ $user->team->name }}
-                    </span>
+                @if($user->employe_id && $user->employe)
+                    <a href="{{ route('personnel.show', $user->employe_id) }}" class="link" style="font-size:12px;">
+                        {{ $user->employe->nom_complet }}
+                    </a>
                 @else
                     <span class="muted">—</span>
                 @endif

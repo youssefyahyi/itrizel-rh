@@ -13,6 +13,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+        if ($user->isSalarie()) {
+            if ($user->employe_id) {
+                return redirect()->route('personnel.show', $user->employe_id);
+            }
+            abort(403, 'Aucune fiche employé liée à votre compte.');
+        }
+
         // ── Stats personnel ───────────────────────────────────────
         $stats = [
             'personnel' => [
