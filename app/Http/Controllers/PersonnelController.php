@@ -47,13 +47,16 @@ class PersonnelController extends Controller
         $employes = $query->paginate(20)->withQueryString();
 
         $stats = [
-            "total"    => Employe::count(),
-            "actifs"   => Employe::actifs()->count(),
-            "inactifs" => Employe::whereIn("statut", ["inactif", "suspendu"])->count(),
-            "expires"  => Employe::whereHas("contratActif", fn($q) =>
-                              $q->whereNotNull("date_fin")
-                               ->whereBetween("date_fin", [now(), now()->addDays(30)])
-                          )->count(),
+            "total"         => Employe::count(),
+            "actifs"        => Employe::actifs()->count(),
+            "inactifs"      => Employe::whereIn("statut", ["inactif", "suspendu"])->count(),
+            "expires"       => Employe::whereHas("contratActif", fn($q) =>
+                                   $q->whereNotNull("date_fin")
+                                    ->whereBetween("date_fin", [now(), now()->addDays(30)])
+                               )->count(),
+            "sans_contrat"  => Employe::actifs()
+                                   ->whereDoesntHave("contratActif")
+                                   ->count(),
         ];
 
         [$fiches, $categories] = $this->ficheData();
