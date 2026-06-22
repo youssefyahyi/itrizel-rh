@@ -103,6 +103,7 @@
     .flyout::before { content:''; position:absolute; left:-8px; top:0; width:8px; height:100%; }
     .nav-group:hover .flyout { opacity: 1; visibility: visible; pointer-events: auto; }
     .flyout-title { padding: 6px 16px 8px; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px; }
+    .flyout-sep { border-top: 1px solid rgba(255,255,255,0.08); margin: 6px 0; }
     .flyout-link { display: flex; align-items: center; padding: 6px 16px; font-size: 12px; color: rgba(255,255,255,0.5); text-decoration: none; transition: background 0.1s, color 0.1s; white-space: nowrap; }
     .flyout-link:hover { background: var(--sidebar-hover); color: rgba(255,255,255,0.9); }
     .flyout-link.active { color: #fff; font-weight: 500; background: var(--sidebar-active); }
@@ -531,7 +532,7 @@
 
                     {{-- Paie --}}
                     <div class="nav-group">
-                        <a href="{{ route('paie.index') }}" class="nav-icon-btn {{ request()->routeIs('paie.*') ? 'active' : '' }}" title="Paie">
+                        <a href="{{ route('paie.index') }}" class="nav-icon-btn {{ request()->routeIs('paie.*') || request()->routeIs('projection.*') ? 'active' : '' }}" title="Paie">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             <span class="nav-text">Paie</span>
                         </a>
@@ -541,6 +542,9 @@
                             <a href="{{ route('paie.livre') }}" class="flyout-link {{ request()->routeIs('paie.livre') ? 'active' : '' }}">Livre de paie</a>
                             <a href="{{ route('paie.bordereau') }}" class="flyout-link {{ request()->routeIs('paie.bordereau') ? 'active' : '' }}">Bordereau CNSS/AMO</a>
                             <a href="{{ route('paie.das') }}" class="flyout-link {{ request()->routeIs('paie.das') ? 'active' : '' }}">DAS</a>
+                            <div class="flyout-sep"></div>
+                            <div class="flyout-title">Prévisionnel</div>
+                            <a href="{{ route('projection.index') }}" class="flyout-link {{ request()->routeIs('projection.*') ? 'active' : '' }}">Projection masse sal.</a>
                         </div>
                     </div>
 

@@ -19,6 +19,7 @@ use App\Http\Controllers\CategorieEmployeController;
 use App\Http\Controllers\FonctionController;
 use App\Http\Controllers\PosteController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ProjectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,6 +58,17 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('paie',        PaieController::class)->parameters(['paie' => 'paie']);
         Route::get('paie/{paie}/print',[PaieController::class, 'print'])->name('paie.print');
         Route::get('paie-taux',        [PaieController::class, 'taux'])->name('paie.taux');
+
+        // Projection Masse Salariale (PMS)
+        Route::get('projection',                    [ProjectionController::class, 'index'])->name('projection.index');
+        Route::get('projection/creer',              [ProjectionController::class, 'create'])->name('projection.create');
+        Route::get('projection/comparer',           [ProjectionController::class, 'comparer'])->name('projection.comparer');
+        Route::post('projection',                   [ProjectionController::class, 'store'])->name('projection.store');
+        Route::get('projection/{scenario}',         [ProjectionController::class, 'show'])->name('projection.show');
+        Route::get('projection/{scenario}/modifier',[ProjectionController::class, 'edit'])->name('projection.edit');
+        Route::put('projection/{scenario}',         [ProjectionController::class, 'update'])->name('projection.update');
+        Route::delete('projection/{scenario}',      [ProjectionController::class, 'destroy'])->name('projection.destroy');
+        Route::post('projection/{scenario}/archiver',[ProjectionController::class, 'archiver'])->name('projection.archiver');
         Route::resource('documents',   DocumentController::class);
     });
 
