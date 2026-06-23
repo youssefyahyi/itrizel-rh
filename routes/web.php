@@ -21,6 +21,8 @@ use App\Http\Controllers\PosteController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProjectionController;
 use App\Http\Controllers\CodificationController;
+use App\Http\Controllers\OutilsController;
+use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -71,6 +73,18 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('projection/{scenario}',      [ProjectionController::class, 'destroy'])->name('projection.destroy');
         Route::post('projection/{scenario}/archiver',[ProjectionController::class, 'archiver'])->name('projection.archiver');
         Route::resource('documents',   DocumentController::class);
+    });
+
+    // Outils — interdit aux salariés
+    Route::middleware('not.salarie')->prefix('outils')->name('outils.')->group(function () {
+        Route::get('/',                                    [OutilsController::class, 'index'])->name('index');
+        Route::get('import',                               [ImportController::class, 'index'])->name('import.index');
+        Route::get('import/{entite}/modele',               [ImportController::class, 'modele'])->name('import.modele');
+        Route::get('import/{entite}/charger',              [ImportController::class, 'charger'])->name('import.charger');
+        Route::post('import/{entite}/upload',              [ImportController::class, 'upload'])->name('import.upload');
+        Route::get('import/{entite}/preview',              [ImportController::class, 'preview'])->name('import.preview');
+        Route::post('import/{entite}/importer',            [ImportController::class, 'importer'])->name('import.importer');
+        Route::get('import/{entite}/resultat',             [ImportController::class, 'resultat'])->name('import.resultat');
     });
 
     // Paramétrage — interdit aux salariés
