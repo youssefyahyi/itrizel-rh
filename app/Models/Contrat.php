@@ -69,10 +69,7 @@ class Contrat extends Model
 
     public static function generateReference(): string
     {
-        $annee = date('Y');
-        $last  = static::where('reference', 'like', "CTR-{$annee}-%")->max('reference');
-        $seq   = $last ? (int) substr($last, -4) + 1 : 1;
-        return "CTR-{$annee}-" . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        return app(\App\Services\CodificationService::class)->generer('contrat');
     }
 
     // ── Relations ──────────────────────────────────────────────────

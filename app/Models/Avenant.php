@@ -29,8 +29,8 @@ class Avenant extends Model
 
     public static function generateReference(Contrat $contrat): string
     {
-        $count = static::where('contrat_id', $contrat->id)->count() + 1;
-        return 'AVN-' . $contrat->reference . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
+        return app(\App\Services\CodificationService::class)
+            ->generer('avenant', ['parent_ref' => $contrat->reference]);
     }
 
     public function contrat(): BelongsTo  { return $this->belongsTo(Contrat::class); }

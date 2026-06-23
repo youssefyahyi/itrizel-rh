@@ -20,6 +20,7 @@ use App\Http\Controllers\FonctionController;
 use App\Http\Controllers\PosteController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProjectionController;
+use App\Http\Controllers\CodificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -89,6 +90,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('contrats/{clause}',              [ParametrageContratController::class, 'destroy'])->name('contrats.destroy');
         Route::patch('contrats/{clause}/monter',        [ParametrageContratController::class, 'monter'])->name('contrats.monter');
         Route::patch('contrats/{clause}/descendre',     [ParametrageContratController::class, 'descendre'])->name('contrats.descendre');
+
+        // Codification
+        Route::get('codification',                              [CodificationController::class, 'index'])->name('codification.index');
+        Route::put('codification/{codification}',               [CodificationController::class, 'update'])->name('codification.update');
+        Route::patch('codification/{codification}/reinitialiser',[CodificationController::class, 'reinitialiser'])->name('codification.reinitialiser');
+        Route::get('codification/apercu',                       [CodificationController::class, 'apercu'])->name('codification.apercu');
 
         // Organisation
         Route::get('organisation',           [OrganisationController::class, 'index'])->name('organisation.index');

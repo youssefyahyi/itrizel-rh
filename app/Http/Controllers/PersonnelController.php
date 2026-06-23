@@ -5,7 +5,9 @@ use App\Http\Controllers\Concerns\HasFicheData;
 use App\Http\Requests\StoreEmployeRequest;
 use App\Http\Requests\UpdateEmployeRequest;
 use App\Models\AuditLog;
+use App\Models\CategorieEmploye;
 use App\Models\Employe;
+use App\Models\UniteOrganisationnelle;
 use Illuminate\Http\Request;
 
 class PersonnelController extends Controller
@@ -29,7 +31,7 @@ class PersonnelController extends Controller
     public function index(Request $request)
     {
         $this->abortIfSalarie();
-        $query = Employe::with(["contratActif", "fichePoste"])->orderBy("nom");
+        $query = Employe::with(["contratActif", "fichePoste.categorie", "unite"])->orderBy("nom");
 
         if ($request->filled("q")) {
             $query->where(function ($q) use ($request) {
@@ -44,6 +46,36 @@ class PersonnelController extends Controller
             $query->where("statut", $request->statut);
         }
 
+        if ($request->filled("unite_id")) {
+            $query->where("unite_id", $request->unite_id);
+        }
+
+        if ($request->filled("categorie_id")) {
+            $query->whereHas("fichePoste", fn($q) =>
+                $q->where("categorie_id", $request->categorie_id)
+            );
+        }
+
+        if ($request->filled("type_contrat")) {
+            $query->whereHas("contratActif", fn($q) =>
+                $q->where("type", $request->type_contrat)
+            );
+        }
+
+        if ($request->filled("anciennete")) {
+            match ($request->anciennete) {
+                "lt1"   => $query->where("date_embauche", ">=", now()->subYear()),
+                "1a5"   => $query->whereBetween("date_embauche", [now()->subYears(5), now()->subYear()]),
+                "5a10"  => $query->whereBetween("date_embauche", [now()->subYears(10), now()->subYears(5)]),
+                "gt10"  => $query->where("date_embauche", "<=", now()->subYears(10)),
+                default => null,
+            };
+        }
+
+        if ($request->filled("sans_contrat")) {
+            $query->whereDoesntHave("contratActif");
+        }
+
         $employes = $query->paginate(20)->withQueryString();
 
         $stats = [
@@ -54,14 +86,15 @@ class PersonnelController extends Controller
                                    $q->whereNotNull("date_fin")
                                     ->whereBetween("date_fin", [now(), now()->addDays(30)])
                                )->count(),
-            "sans_contrat"  => Employe::actifs()
-                                   ->whereDoesntHave("contratActif")
-                                   ->count(),
+            "sans_contrat"  => Employe::actifs()->whereDoesntHave("contratActif")->count(),
         ];
 
         [$fiches, $categories] = $this->ficheData();
 
-        return view("personnel.index", compact("employes", "stats", "fiches", "categories"));
+        $unites      = UniteOrganisationnelle::orderBy("nom")->get(["id", "nom", "type"]);
+        $filtreCategories = CategorieEmploye::orderBy("nom")->get(["id", "nom"]);
+
+        return view("personnel.index", compact("employes", "stats", "fiches", "categories", "unites", "filtreCategories"));
     }
 
     // ── Formulaire création ────────────────────────────────────────

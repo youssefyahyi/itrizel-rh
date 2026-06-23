@@ -46,6 +46,14 @@
             </div>
         </a>
 
+        <a href="{{ route('parametrage.codification.index') }}" class="param-card">
+            <div class="param-card-icon">&#128290;</div>
+            <div>
+                <div class="param-card-title">Codification</div>
+                <div class="param-card-desc">Format des matricules, références contrats et avenants</div>
+            </div>
+        </a>
+
     </div>
 </div>
 

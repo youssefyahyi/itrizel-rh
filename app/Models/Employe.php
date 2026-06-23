@@ -77,12 +77,7 @@ class Employe extends Model
      */
     public static function generateMatricule(): string
     {
-        $annee   = date('Y');
-        $dernier = static::where('matricule', 'like', "EMP-{$annee}-%")
-                         ->orderByDesc('matricule')
-                         ->value('matricule');
-        $seq = $dernier ? (int) substr($dernier, -4) + 1 : 1;
-        return "EMP-{$annee}-" . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        return app(\App\Services\CodificationService::class)->generer('matricule');
     }
 
     // ── Relations ──────────────────────────────────────────────────
