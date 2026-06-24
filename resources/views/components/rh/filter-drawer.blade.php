@@ -208,6 +208,7 @@
         </div>`;
 
         document.getElementById('fd-add-btn').insertAdjacentHTML('beforebegin', html);
+        if (key) document.getElementById('fd-row-' + id).querySelector('.fd-key-sel').value = key;
         refreshKeyOptions();
     };
 
