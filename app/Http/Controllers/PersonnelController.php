@@ -82,7 +82,7 @@ class PersonnelController extends Controller
         $stats = [
             "total"         => Employe::count(),
             "actifs"        => Employe::actifs()->count(),
-            "inactifs"      => Employe::whereIn("statut", ["inactif", "suspendu"])->count(),
+            "inactifs"      => Employe::inactifs()->count(),
             "expires"       => Employe::whereHas("contratActif", fn($q) =>
                                    $q->whereNotNull("date_fin")
                                     ->whereBetween("date_fin", [now(), now()->addDays(30)])

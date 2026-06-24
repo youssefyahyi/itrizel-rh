@@ -93,6 +93,19 @@ elseif (!empty($ligne['categorie_id']) && $type === 'revalorisation') $ciblage =
                class="uf-control" step="100" min="0" placeholder="Ex : 12000" disabled>
     </div>
 
+    <div class="champ-emb" style="display:none;min-width:155px;">
+        <label class="uf-label">Unité (optionnel)</label>
+        <select name="lignes[{{ $i }}][unite_id]" class="uf-control" disabled>
+            <option value="">— Non affectée —</option>
+            @foreach($unites ?? [] as $unite)
+            <option value="{{ $unite->id }}"
+                {{ ($type === 'embauche' && ($ligne['unite_id'] ?? '') == $unite->id) ? 'selected' : '' }}>
+                {{ $unite->nom }}
+            </option>
+            @endforeach
+        </select>
+    </div>
+
     {{-- ── DÉPART ──────────────────────────────────────────────────── --}}
     <div class="champ-dep" style="display:none;flex:1;min-width:200px;">
         <label class="uf-label">Employé</label>

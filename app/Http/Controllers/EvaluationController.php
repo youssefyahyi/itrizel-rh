@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HasSalarieScope;
 use App\Http\Requests\StoreEvaluationRequest;
 use App\Http\Requests\UpdateEvaluationRequest;
 use App\Models\AuditLog;
@@ -12,18 +13,7 @@ use Illuminate\Http\Request;
 
 class EvaluationController extends Controller
 {
-    private function salarie(): ?\App\Models\User
-    {
-        $user = auth()->user();
-        return $user->isSalarie() ? $user : null;
-    }
-
-    private function checkOwnership(Evaluation $evaluation): void
-    {
-        if ($sal = $this->salarie()) {
-            if ($evaluation->employe_id !== $sal->employe_id) abort(403);
-        }
-    }
+    use HasSalarieScope;
 
     public function index(Request $request)
     {

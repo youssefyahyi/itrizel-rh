@@ -68,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('paie',        PaieController::class)->parameters(['paie' => 'paie']);
         Route::get('paie/{paie}/print',[PaieController::class, 'print'])->name('paie.print');
         Route::get('paie-taux',        [PaieController::class, 'taux'])->name('paie.taux');
+        Route::post('paie-simuler',    [PaieController::class, 'simuler'])->name('paie.simuler');
 
         // Projection Masse Salariale (PMS)
         Route::get('projection',                    [ProjectionController::class, 'index'])->name('projection.index');

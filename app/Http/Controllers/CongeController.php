@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HasSalarieScope;
 use App\Http\Requests\StoreCongeRequest;
 use App\Http\Requests\UpdateCongeRequest;
 use App\Models\AuditLog;
@@ -13,18 +14,14 @@ use Illuminate\Http\Request;
 
 class CongeController extends Controller
 {
+    use HasSalarieScope;
+
     private function formData(): array
     {
         return [
             'calendrier'    => ParametrageRh::get('rh.calendrier_conges', 'ouvrable'),
             'jours_feries'  => JourFerie::toutesDates(),
         ];
-    }
-
-    private function salarie(): ?\App\Models\User
-    {
-        $user = auth()->user();
-        return $user->isSalarie() ? $user : null;
     }
 
     public function index(Request $request)

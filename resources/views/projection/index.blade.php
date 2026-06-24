@@ -16,18 +16,36 @@
 
 @if(session('success'))<x-rh.alert type="success" :message="session('success')" />@endif
 
-{{-- Sélecteur horizon --}}
+{{-- Sélecteur horizon + scénario --}}
 <div class="info-card" style="padding:14px 20px;">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <span style="font-size:13px;font-weight:500;color:var(--text-secondary);">Horizon de projection :</span>
+        <span style="font-size:13px;font-weight:500;color:var(--text-secondary);">Horizon :</span>
         <div style="display:flex;gap:6px;">
             @foreach([6, 12, 24] as $h)
-            <a href="{{ route('projection.index', ['horizon' => $h]) }}"
+            <a href="{{ route('projection.index', ['horizon' => $h, 'scenario' => $scenarioActif?->id]) }}"
                class="btn {{ $horizon === $h ? 'btn-primary' : 'btn-outline' }} btn-sm">
                 {{ $h }} mois
             </a>
             @endforeach
         </div>
+        <div style="width:1px;height:20px;background:var(--border);flex-shrink:0;"></div>
+        <span style="font-size:13px;font-weight:500;color:var(--text-secondary);">Vue :</span>
+        <select id="sel-scenario" onchange="window.location.href=this.value" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;color:var(--text-primary);background:var(--surface);cursor:pointer;">
+            <option value="{{ route('projection.index', ['horizon' => $horizon]) }}"
+                {{ !$scenarioActif ? 'selected' : '' }}>Situation actuelle</option>
+            @foreach($scenarios as $sc)
+            <option value="{{ route('projection.index', ['horizon' => $horizon, 'scenario' => $sc->id]) }}"
+                {{ $scenarioActif?->id == $sc->id ? 'selected' : '' }}>{{ $sc->nom }}</option>
+            @endforeach
+        </select>
+        @if($scenarioActif)
+        <a href="{{ route('projection.edit', $scenarioActif) }}" class="btn btn-outline btn-sm">Modifier</a>
+        <form method="POST" action="{{ route('projection.destroy', $scenarioActif) }}" style="display:inline;">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger);"
+                onclick="return confirm('Supprimer « {{ addslashes($scenarioActif->nom) }} » ?')">Supprimer</button>
+        </form>
+        @endif
         <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">
             {{ now()->addMonth()->format('m/Y') }} → {{ now()->addMonths($horizon)->format('m/Y') }}
         </span>
@@ -71,7 +89,7 @@
 {{-- Tableau mensuel --}}
 <div class="info-card" style="padding:0;overflow:hidden;">
     <div style="padding:14px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">Détail mensuel — Situation actuelle</span>
+        <span style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">Détail mensuel — {{ $labelVue }}</span>
     </div>
     <div style="overflow-x:auto;">
     <table class="proj-table">
@@ -90,7 +108,7 @@
         <tbody>
         @foreach($situation as $m)
         <tr class="expandable" data-mois="{{ $m['mois'] }}">
-            <td>
+            <td style="white-space:nowrap;">
                 @if(count($m['unites']) > 1)
                 <button class="toggle-btn" onclick="toggleUnites('{{ $m['mois'] }}')">▶</button>
                 @endif
@@ -105,27 +123,21 @@
             <td class="num accent fw">{{ number_format($m['global']['cout_employeur'], 0, ',', ' ') }}</td>
         </tr>
         @if(count($m['unites']) > 1)
-        <tr class="unites-row hidden" id="unites-{{ $m['mois'] }}">
-            <td colspan="8" style="padding:0 0 0 24px;background:var(--surface-soft);">
-                <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                    @foreach($m['unites'] as $u)
-                    <tr style="border-top:1px solid var(--border-light);">
-                        <td style="padding:6px 12px;color:var(--text-secondary);padding-left:32px;">
-                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px;opacity:.5;"></span>
-                            {{ $u['nom'] }}
-                        </td>
-                        <td class="num" style="padding:6px 8px;">{{ $u['effectif'] }}</td>
-                        <td class="num" style="padding:6px 8px;">{{ number_format($u['brut'], 0, ',', ' ') }}</td>
-                        <td class="num" style="padding:6px 8px;">{{ number_format($u['charges_sal'], 0, ',', ' ') }}</td>
-                        <td class="num" style="padding:6px 8px;">{{ number_format($u['ir'], 0, ',', ' ') }}</td>
-                        <td class="num" style="padding:6px 8px;">{{ number_format($u['net'], 0, ',', ' ') }}</td>
-                        <td class="num" style="padding:6px 8px;">{{ number_format($u['charges_pat'], 0, ',', ' ') }}</td>
-                        <td class="num fw" style="padding:6px 8px;">{{ number_format($u['cout_employeur'], 0, ',', ' ') }}</td>
-                    </tr>
-                    @endforeach
-                </table>
+        @foreach($m['unites'] as $u)
+        <tr class="unite-row hidden" data-parent="{{ $m['mois'] }}" style="background:var(--surface-soft);font-size:12px;">
+            <td style="padding:6px 12px 6px 36px;border-top:1px solid var(--border-light);color:var(--text-secondary);">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;opacity:.4;"></span>
+                {{ $u['nom'] }}
             </td>
+            <td class="num">{{ $u['effectif'] }}</td>
+            <td class="num">{{ number_format($u['brut'], 0, ',', ' ') }}</td>
+            <td class="num">{{ number_format($u['charges_sal'], 0, ',', ' ') }}</td>
+            <td class="num">{{ number_format($u['ir'], 0, ',', ' ') }}</td>
+            <td class="num">{{ number_format($u['net'], 0, ',', ' ') }}</td>
+            <td class="num">{{ number_format($u['charges_pat'], 0, ',', ' ') }}</td>
+            <td class="num fw accent">{{ number_format($u['cout_employeur'], 0, ',', ' ') }}</td>
         </tr>
+        @endforeach
         @endif
         @endforeach
         </tbody>
@@ -133,41 +145,6 @@
     </div>
 </div>
 
-{{-- Scénarios sauvegardés --}}
-<div class="info-card" style="padding:0;overflow:hidden;">
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">
-            Scénarios ({{ $scenarios->count() }}/10)
-        </span>
-        <a href="{{ route('projection.create') }}" class="tb-btn">+ Nouveau</a>
-    </div>
-    @if($scenarios->isEmpty())
-    <div style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px;">
-        Aucun scénario — créez-en un pour simuler des changements.
-    </div>
-    @else
-    @foreach($scenarios as $sc)
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border-light);">
-        <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;color:var(--text-primary);">{{ $sc->nom }}</div>
-            @if($sc->description)
-            <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $sc->description }}</div>
-            @endif
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $sc->horizon }} mois · {{ $sc->lignes_count ?? $sc->lignes()->count() }} ligne(s)</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;">
-            <a href="{{ route('projection.comparer', ['a' => $sc->id, 'b' => 'base']) }}" class="btn btn-primary btn-sm">Comparer</a>
-            <a href="{{ route('projection.edit', $sc) }}" class="btn btn-outline btn-sm">Modifier</a>
-            <form method="POST" action="{{ route('projection.archiver', $sc) }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-outline btn-sm"
-                    onclick="return confirm('Archiver ce scénario ?')">Archiver</button>
-            </form>
-        </div>
-    </div>
-    @endforeach
-    @endif
-</div>
 
 </div>
 
@@ -230,11 +207,11 @@ new Chart(ctx, {
 });
 
 function toggleUnites(mois) {
-    const row = document.getElementById('unites-' + mois);
-    const btn = document.querySelector('[data-mois="' + mois + '"] .toggle-btn');
-    if (!row) return;
-    row.classList.toggle('hidden');
-    btn.textContent = row.classList.contains('hidden') ? '▶' : '▼';
+    const rows = document.querySelectorAll('[data-parent="' + mois + '"]');
+    const btn  = document.querySelector('[data-mois="' + mois + '"] .toggle-btn');
+    let hidden = false;
+    rows.forEach(r => { r.classList.toggle('hidden'); hidden = r.classList.contains('hidden'); });
+    if (btn) btn.textContent = hidden ? '▶' : '▼';
 }
 </script>
 

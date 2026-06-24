@@ -26,7 +26,7 @@ class DashboardController extends Controller
             'personnel' => [
                 'total'    => Employe::count(),
                 'actifs'   => Employe::actifs()->count(),
-                'inactifs' => Employe::whereIn('statut', ['inactif', 'suspendu'])->count(),
+                'inactifs' => Employe::inactifs()->count(),
             ],
             'contrats' => [
                 'actifs'   => Contrat::actifs()->count(),

@@ -88,6 +88,9 @@ class ProjectionCalculateur
             );
             $calc = $this->paie->calculer($salaire, 0, $emp, $mois->month, $mois->year);
             $this->accumulate($global, $calc);
+            if ($ligne->unite_id) {
+                $this->accumulateUnite($parUnite, $emp, $calc);
+            }
         }
 
         return [
@@ -171,6 +174,10 @@ class ProjectionCalculateur
         $emp->situation_familiale = 'celibataire';
         $emp->nombre_enfants      = 0;
         $emp->date_embauche       = $ligne->mois_effet;
+        if ($ligne->unite_id) {
+            $emp->unite_id = $ligne->unite_id;
+            $emp->setRelation('unite', $ligne->unite);
+        }
         return $emp;
     }
 

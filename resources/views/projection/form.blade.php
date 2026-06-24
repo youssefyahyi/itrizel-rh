@@ -11,7 +11,7 @@
 <x-rh.alert type="danger" message="{{ implode(' — ', $errors->all()) }}" />
 @endif
 
-<form method="POST"
+<form id="form-scenario" method="POST"
       action="{{ $isEdit ? route('projection.update', $scenario) : route('projection.store') }}">
     @csrf
     @if($isEdit) @method('PUT') @endif
@@ -70,24 +70,24 @@
         </div>
     </div>
 
-    {{-- Actions --}}
-    <div style="display:flex;gap:10px;align-items:center;">
-        <button type="submit" class="btn btn-primary btn-sm">
-            {{ $isEdit ? 'Enregistrer les modifications' : 'Créer le scénario' }}
-        </button>
-        <a href="{{ route('projection.index') }}" class="tb-btn">Annuler</a>
-        @if($isEdit)
-        <form method="POST" action="{{ route('projection.destroy', $scenario) }}" style="margin-left:auto;">
-            @csrf @method('DELETE')
-            <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger);"
-                onclick="return confirm('Supprimer ce scénario définitivement ?')">
-                Supprimer
-            </button>
-        </form>
-        @endif
-    </div>
-
 </form>
+
+{{-- Actions — hors du form principal pour éviter l'imbrication --}}
+<div style="display:flex;gap:10px;align-items:center;">
+    <button type="submit" form="form-scenario" class="btn btn-primary btn-sm">
+        {{ $isEdit ? 'Enregistrer les modifications' : 'Créer le scénario' }}
+    </button>
+    <a href="{{ route('projection.index') }}" class="tb-btn">Annuler</a>
+    @if($isEdit)
+    <form method="POST" action="{{ route('projection.destroy', $scenario) }}" style="margin-left:auto;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger);"
+            onclick="return confirm('Supprimer ce scénario définitivement ?')">
+            Supprimer
+        </button>
+    </form>
+    @endif
+</div>
 </div>
 
 {{-- Template ligne (hidden) --}}

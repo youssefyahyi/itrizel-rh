@@ -246,4 +246,40 @@ class PaieController extends Controller
             'ir_bareme'                  => ParametrageRh::getJson('paie.ir_bareme', []),
         ]);
     }
+
+    /**
+     * Simulation de calcul en temps réel depuis le formulaire de saisie.
+     * Appelle le vrai PaieCalculateur côté serveur (inclut prime ancienneté).
+     */
+    public function simuler(Request $request)
+    {
+        $base    = (float) $request->input('salaire_base', 0);
+        $primes  = (float) $request->input('total_primes', 0);
+        $avances = (float) $request->input('avances_deduites', 0);
+        $mois    = (int)   $request->input('periode_mois',  now()->month);
+        $annee   = (int)   $request->input('periode_annee', now()->year);
+
+        if ($base <= 0) return response()->json(['error' => 'salaire_base requis'], 422);
+
+        $empId = $request->input('employe_id');
+        $emp   = $empId ? Employe::find($empId) : null;
+
+        if (!$emp) {
+            $emp = new Employe(['situation_familiale' => 'celibataire', 'nombre_enfants' => 0]);
+        }
+
+        $calc    = new PaieCalculateur();
+        $result  = $calc->calculer($base, $primes, $emp, $mois, $annee);
+        $net     = max(0, round($result['net_a_payer'] - $avances, 2));
+
+        return response()->json([
+            'cnss_salarie'   => $result['cnss_salarie'],
+            'amo_salarie'    => $result['amo_salarie'],
+            'cimr_salarie'   => $result['cimr_salarie'],
+            'ir_mensuel'     => $result['ir_mensuel'],
+            'prime_anciennete' => $result['prime_anciennete'],
+            'total_retenues' => $result['total_retenues'],
+            'net_a_payer'    => $net,
+        ]);
+    }
 }

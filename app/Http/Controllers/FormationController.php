@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HasSalarieScope;
 use App\Http\Requests\StoreFormationRequest;
 use App\Http\Requests\UpdateFormationRequest;
 use App\Models\AuditLog;
@@ -11,18 +12,7 @@ use Illuminate\Http\Request;
 
 class FormationController extends Controller
 {
-    private function salarie(): ?\App\Models\User
-    {
-        $user = auth()->user();
-        return $user->isSalarie() ? $user : null;
-    }
-
-    private function checkOwnership(Formation $formation): void
-    {
-        if ($sal = $this->salarie()) {
-            if ($formation->employe_id !== $sal->employe_id) abort(403);
-        }
-    }
+    use HasSalarieScope;
 
     public function index(Request $request)
     {

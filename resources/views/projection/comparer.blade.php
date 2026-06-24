@@ -180,34 +180,28 @@
             @endif
         </tr>
         @if($hasUnites)
-        <tr class="row-unites hidden" id="unites-{{ $moisId }}">
-            <td colspan="8" style="padding:0;background:var(--surface-soft);">
-                <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                @foreach($nomsUnites as $nomU)
-                @php
-                    $uA = $unitesA->get($nomU);
-                    $uB = $unitesB->get($nomU);
-                    $dU = ($uB['cout_employeur'] ?? 0) - ($uA['cout_employeur'] ?? 0);
-                @endphp
-                <tr style="border-top:1px solid var(--border-light);">
-                    <td style="padding:6px 12px 6px 32px;color:var(--text-secondary);min-width:110px;">
-                        <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;opacity:.4;"></span>
-                        {{ $nomU }}
-                    </td>
-                    <td class="num" style="padding:6px 8px;color:var(--accent);">{{ $uA['effectif'] ?? '—' }}</td>
-                    <td class="num" style="padding:6px 8px;color:var(--accent);">{{ $uA ? number_format($uA['brut'], 0, ',', ' ') : '—' }}</td>
-                    <td class="num" style="padding:6px 8px;color:var(--accent);font-weight:600;">{{ $uA ? number_format($uA['cout_employeur'], 0, ',', ' ') : '—' }}</td>
-                    <td class="num" style="padding:6px 8px;color:#10b981;">{{ $uB['effectif'] ?? '—' }}</td>
-                    <td class="num" style="padding:6px 8px;color:#10b981;">{{ $uB ? number_format($uB['brut'], 0, ',', ' ') : '—' }}</td>
-                    <td class="num" style="padding:6px 8px;color:#10b981;font-weight:600;">{{ $uB ? number_format($uB['cout_employeur'], 0, ',', ' ') : '—' }}</td>
-                    <td class="num {{ $dU > 0 ? 'red' : ($dU < 0 ? 'green' : '') }}" style="padding:6px 8px;">
-                        {{ $dU != 0 ? ($dU > 0 ? '+' : '') . number_format($dU, 0, ',', ' ') : '—' }}
-                    </td>
-                </tr>
-                @endforeach
-                </table>
+        @foreach($nomsUnites as $nomU)
+        @php
+            $uA = $unitesA->get($nomU);
+            $uB = $unitesB->get($nomU);
+            $dU = ($uB['cout_employeur'] ?? 0) - ($uA['cout_employeur'] ?? 0);
+        @endphp
+        <tr class="row-unite hidden" data-parent="{{ $moisId }}" style="background:var(--surface-soft);font-size:12px;">
+            <td style="padding:6px 12px 6px 36px;border-top:1px solid var(--border-light);color:var(--text-secondary);">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;opacity:.4;"></span>
+                {{ $nomU }}
+            </td>
+            <td class="num" style="color:var(--accent);">{{ $uA['effectif'] ?? '—' }}</td>
+            <td class="num" style="color:var(--accent);">{{ $uA ? number_format($uA['brut'], 0, ',', ' ') : '—' }}</td>
+            <td class="num fw" style="color:var(--accent);">{{ $uA ? number_format($uA['cout_employeur'], 0, ',', ' ') : '—' }}</td>
+            <td class="num" style="color:#10b981;">{{ $uB['effectif'] ?? '—' }}</td>
+            <td class="num" style="color:#10b981;">{{ $uB ? number_format($uB['brut'], 0, ',', ' ') : '—' }}</td>
+            <td class="num fw" style="color:#10b981;">{{ $uB ? number_format($uB['cout_employeur'], 0, ',', ' ') : '—' }}</td>
+            <td class="num {{ $dU > 0 ? 'red' : ($dU < 0 ? 'green' : '') }}">
+                {{ $dU != 0 ? ($dU > 0 ? '+' : '') . number_format($dU, 0, ',', ' ') : '—' }}
             </td>
         </tr>
+        @endforeach
         @endif
         @endforeach
         </tbody>
@@ -280,11 +274,11 @@ new Chart(document.getElementById('chartCompare').getContext('2d'), {
 
 <script>
 function toggleUnites(moisId) {
-    const row = document.getElementById('unites-' + moisId);
-    const btn = document.querySelector('[data-mois="' + moisId + '"] .toggle-btn');
-    if (!row) return;
-    row.classList.toggle('hidden');
-    if (btn) btn.textContent = row.classList.contains('hidden') ? '▶' : '▼';
+    const rows = document.querySelectorAll('[data-parent="' + moisId + '"]');
+    const btn  = document.querySelector('[data-mois="' + moisId + '"] .toggle-btn');
+    let hidden = false;
+    rows.forEach(r => { r.classList.toggle('hidden'); hidden = r.classList.contains('hidden'); });
+    if (btn) btn.textContent = hidden ? '▶' : '▼';
 }
 </script>
 

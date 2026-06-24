@@ -21,7 +21,7 @@
             @endforeach
         </select>
         @else
-        <input type="text" class="form-control" value="{{ $bulletin->employe->nom_complet }}" disabled>
+        <input type="text" class="form-control" value="{{ $bulletin->employe?->nom_complet ?? '—' }}" disabled>
         @endif
     </x-rh.form-field>
     <x-rh.form-field label="Mois" name="periode_mois" :required="true">
@@ -101,58 +101,45 @@
 </form>
 </div>
 <script>
-(async function () {
-    let taux = null;
+(function () {
     const fmt = v => new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v) + ' DH';
-
-    async function loadTaux() {
-        if (taux) return taux;
-        const r = await fetch('{{ route("paie.taux") }}');
-        taux = await r.json();
-        return taux;
-    }
+    let timer = null;
 
     async function simulate() {
         const base   = parseFloat(document.querySelector('[name=salaire_base]')?.value  || 0);
         const primes = parseFloat(document.querySelector('[name=total_primes]')?.value  || 0);
         if (base <= 0) { document.getElementById('sim-card').style.display = 'none'; return; }
 
-        const t = await loadTaux();
+        const body = new URLSearchParams({
+            salaire_base:      base,
+            total_primes:      primes,
+            avances_deduites:  parseFloat(document.querySelector('[name=avances_deduites]')?.value || 0),
+            employe_id:        document.querySelector('[name=employe_id]')?.value || '',
+            periode_mois:      document.querySelector('[name=periode_mois]')?.value  || '{{ now()->month }}',
+            periode_annee:     document.querySelector('[name=periode_annee]')?.value || '{{ now()->year }}',
+            _token:            document.querySelector('meta[name=csrf-token]')?.content || '{{ csrf_token() }}',
+        });
 
-        // Prime ancienneté (côté JS : 0 — le vrai calcul est serveur, on l'affiche pour info)
-        const anc = 0;
-        const brut = base + anc + primes;
+        const r = await fetch('{{ route("paie.simuler") }}', { method: 'POST', body });
+        if (!r.ok) return;
+        const d = await r.json();
 
-        const assietteCnss = Math.min(brut, t.cnss_plafond);
-        const cnss = Math.round(assietteCnss * t.cnss_taux_salarie / 100 * 100) / 100;
-        const amo  = Math.round(brut * t.amo_taux_salarie / 100 * 100) / 100;
-        const cimr = t.cimr_actif ? Math.round(brut * t.cimr_taux_salarie / 100 * 100) / 100 : 0;
-
-        const baseImp  = brut - cnss - amo;
-        const abat     = Math.max(t.ir_abattement_min / 12, Math.min(t.ir_abattement_max / 12, baseImp * t.ir_abattement_taux / 100));
-        const netImpAn = Math.max(0, baseImp - abat) * 12;
-        let irAn = 0;
-        for (const tr of t.ir_bareme) { if (netImpAn > tr.min) irAn = netImpAn * tr.taux / 100 - tr.somme_a_deduire; }
-        const ir = Math.round(Math.max(0, irAn) / 12 * 100) / 100;
-
-        const totalRet = cnss + amo + cimr + ir;
-        const avances  = parseFloat(document.querySelector('[name=avances_deduites]')?.value || 0);
-        const net      = Math.round((brut - totalRet - avances) * 100) / 100;
-
-        document.getElementById('s-cnss').textContent = fmt(cnss);
-        document.getElementById('s-amo').textContent  = fmt(amo);
-        document.getElementById('s-cimr').textContent = fmt(cimr);
-        document.getElementById('s-ir').textContent   = fmt(ir);
-        document.getElementById('s-anc').textContent  = '— (calculé serveur)';
-        document.getElementById('s-ret').textContent  = fmt(totalRet);
-        document.getElementById('s-net').textContent  = fmt(net);
+        document.getElementById('s-cnss').textContent = fmt(d.cnss_salarie);
+        document.getElementById('s-amo').textContent  = fmt(d.amo_salarie);
+        document.getElementById('s-cimr').textContent = fmt(d.cimr_salarie);
+        document.getElementById('s-ir').textContent   = fmt(d.ir_mensuel);
+        document.getElementById('s-anc').textContent  = fmt(d.prime_anciennete);
+        document.getElementById('s-ret').textContent  = fmt(d.total_retenues);
+        document.getElementById('s-net').textContent  = fmt(d.net_a_payer);
         document.getElementById('sim-card').style.display = '';
     }
 
-    ['salaire_base','total_primes','avances_deduites'].forEach(name => {
-        document.querySelector('[name=' + name + ']')?.addEventListener('input', simulate);
-    });
+    function debounce() { clearTimeout(timer); timer = setTimeout(simulate, 400); }
 
+    ['salaire_base','total_primes','avances_deduites'].forEach(name => {
+        document.querySelector('[name=' + name + ']')?.addEventListener('input', debounce);
+    });
+    document.querySelector('[name=employe_id]')?.addEventListener('change', simulate);
     simulate();
 })();
 </script>

@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers;
+use App\Http\Requests\StoreAbsenceRequest;
+use App\Http\Requests\UpdateAbsenceRequest;
 use App\Models\Absence;
 use App\Models\Employe;
 use App\Models\AuditLog;
@@ -29,19 +31,9 @@ class AbsenceController extends Controller
         $employes = Employe::actifs()->orderBy('nom')->get();
         return view('absences.form', ['absence' => new Absence, 'mode' => 'create', 'employes' => $employes]);
     }
-    public function store(Request $request)
+    public function store(StoreAbsenceRequest $request)
     {
-        $data = $request->validate([
-            'employe_id'       => 'required|exists:employes,id',
-            'date'             => 'required|date|before_or_equal:today',
-            'statut'           => 'required|in:present,absent,conge,ferie,mission',
-            'heure_arrivee'    => 'nullable|date_format:H:i',
-            'heure_depart'     => 'nullable|date_format:H:i',
-            'heures_prevues'   => 'nullable|numeric|min:0|max:24',
-            'heures_realisees' => 'nullable|numeric|min:0|max:24',
-            'motif_absence'    => 'nullable|string|max:255',
-            'remarque'         => 'nullable|string',
-        ]);
+        $data = $request->validated();
         $data['created_by'] = auth()->id();
         $absence = Absence::create($data);
         AuditLog::log('Absences','creation',"Absence du {$absence->date->format('d/m/Y')} - {$absence->employe->nom_complet}",$absence);
@@ -53,18 +45,9 @@ class AbsenceController extends Controller
         $employes = Employe::actifs()->orderBy('nom')->get();
         return view('absences.form',['absence'=>$absence,'mode'=>'edit','employes'=>$employes]);
     }
-    public function update(Request $request, Absence $absence)
+    public function update(UpdateAbsenceRequest $request, Absence $absence)
     {
-        $data = $request->validate([
-            'statut'           => 'required|in:present,absent,conge,ferie,mission',
-            'heure_arrivee'    => 'nullable|date_format:H:i',
-            'heure_depart'     => 'nullable|date_format:H:i',
-            'heures_prevues'   => 'nullable|numeric|min:0|max:24',
-            'heures_realisees' => 'nullable|numeric|min:0|max:24',
-            'motif_absence'    => 'nullable|string|max:255',
-            'remarque'         => 'nullable|string',
-        ]);
-        $absence->update($data);
+        $absence->update($request->validated());
         AuditLog::log('Absences','modification',"Absence du {$absence->date->format('d/m/Y')} modifiée",$absence);
         return redirect()->route('absences.show',$absence)->with('success','Absence mise à jour.');
     }

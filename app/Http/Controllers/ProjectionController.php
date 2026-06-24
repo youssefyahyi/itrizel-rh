@@ -6,6 +6,7 @@ use App\Models\CategorieEmploye;
 use App\Models\Employe;
 use App\Models\ProjectionScenario;
 use App\Models\ProjectionScenarioLigne;
+use App\Models\UniteOrganisationnelle;
 use App\Services\ProjectionCalculateur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,22 +25,35 @@ class ProjectionController extends Controller
         $horizon   = (int) $request->get('horizon', 12);
         $horizon   = in_array($horizon, [6, 12, 24]) ? $horizon : 12;
 
-        $situation = $this->calc->situationActuelle($horizon);
-        $scenarios = ProjectionScenario::actifs()
-            ->orderByDesc('updated_at')
-            ->limit(10)
-            ->get();
+        $scenarios = ProjectionScenario::actifs()->orderByDesc('updated_at')->limit(10)->get();
 
-        return view('projection.index', compact('situation', 'scenarios', 'horizon'));
+        if ($request->has('scenario')) {
+            $scenarioId = $request->get('scenario') ?: null;
+            session(['pms_scenario_id' => $scenarioId]);
+        } else {
+            $scenarioId = session('pms_scenario_id');
+        }
+
+        $scenarioActif = $scenarioId ? $scenarios->find($scenarioId) : null;
+        if (!$scenarioActif) session()->forget('pms_scenario_id');
+
+        $situation = $scenarioActif
+            ? $this->calc->scenario($scenarioActif, $horizon)
+            : $this->calc->situationActuelle($horizon);
+
+        $labelVue = $scenarioActif ? $scenarioActif->nom : 'Situation actuelle';
+
+        return view('projection.index', compact('situation', 'scenarios', 'horizon', 'scenarioActif', 'labelVue'));
     }
 
     public function create()
     {
         $categories = CategorieEmploye::actives();
         $employes   = Employe::with('fichePoste.categorie')->actifs()->orderBy('nom')->get();
+        $unites     = UniteOrganisationnelle::orderBy('nom')->get(['id', 'nom']);
         $scenario   = new ProjectionScenario(['horizon' => 12]);
 
-        return view('projection.form', compact('scenario', 'categories', 'employes'));
+        return view('projection.form', compact('scenario', 'categories', 'employes', 'unites'));
     }
 
     public function store(Request $request)
@@ -55,6 +69,7 @@ class ProjectionController extends Controller
             'lignes.*.categorie_id'  => 'nullable|exists:categories_employe,id',
             'lignes.*.salaire_estime'=> 'nullable|numeric|min:0',
             'lignes.*.employe_id'    => 'nullable|exists:employes,id',
+            'lignes.*.unite_id'      => 'nullable|exists:unites_organisationnelles,id',
         ]);
 
         if (ProjectionScenario::actifs()->count() >= 10) {
@@ -76,6 +91,7 @@ class ProjectionController extends Controller
                 'categorie_id'   => $ligne['categorie_id'] ?? null,
                 'salaire_estime' => $ligne['salaire_estime'] ?? null,
                 'employe_id'     => $ligne['employe_id'] ?? null,
+                'unite_id'       => $ligne['unite_id'] ?? null,
             ]);
         }
 
@@ -85,7 +101,7 @@ class ProjectionController extends Controller
 
     public function show(ProjectionScenario $scenario)
     {
-        return redirect()->route('projection.comparer', ['a' => $scenario->id, 'b' => 'base']);
+        return redirect()->route('projection.index', ['scenario' => $scenario->id]);
     }
 
     public function comparer(Request $request)
@@ -118,8 +134,8 @@ class ProjectionController extends Controller
         $labelA = $scenarioA?->nom ?? 'Situation actuelle';
         $labelB = $scenarioB?->nom ?? 'Situation actuelle';
 
-        if ($scenarioA) $scenarioA->load('lignes.categorie', 'lignes.employe');
-        if ($scenarioB) $scenarioB->load('lignes.categorie', 'lignes.employe');
+        if ($scenarioA) $scenarioA->load('lignes.categorie', 'lignes.employe', 'lignes.unite');
+        if ($scenarioB) $scenarioB->load('lignes.categorie', 'lignes.employe', 'lignes.unite');
 
         return view('projection.comparer', compact(
             'dataA', 'dataB', 'labelA', 'labelB',
@@ -132,9 +148,10 @@ class ProjectionController extends Controller
     {
         $categories = CategorieEmploye::actives();
         $employes   = Employe::with('fichePoste.categorie')->actifs()->orderBy('nom')->get();
-        $scenario->load('lignes.categorie', 'lignes.employe');
+        $unites     = UniteOrganisationnelle::orderBy('nom')->get(['id', 'nom']);
+        $scenario->load('lignes.categorie', 'lignes.employe', 'lignes.unite');
 
-        return view('projection.form', compact('scenario', 'categories', 'employes'));
+        return view('projection.form', compact('scenario', 'categories', 'employes', 'unites'));
     }
 
     public function update(Request $request, ProjectionScenario $scenario)
@@ -150,6 +167,7 @@ class ProjectionController extends Controller
             'lignes.*.categorie_id'  => 'nullable|exists:categories_employe,id',
             'lignes.*.salaire_estime'=> 'nullable|numeric|min:0',
             'lignes.*.employe_id'    => 'nullable|exists:employes,id',
+            'lignes.*.unite_id'      => 'nullable|exists:unites_organisationnelles,id',
         ]);
 
         $scenario->update([
@@ -168,6 +186,7 @@ class ProjectionController extends Controller
                 'categorie_id'   => $ligne['categorie_id'] ?? null,
                 'salaire_estime' => $ligne['salaire_estime'] ?? null,
                 'employe_id'     => $ligne['employe_id'] ?? null,
+                'unite_id'       => $ligne['unite_id'] ?? null,
             ]);
         }
 

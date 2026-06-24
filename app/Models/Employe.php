@@ -68,7 +68,8 @@ class Employe extends Model
     }
 
     // ── Scopes ─────────────────────────────────────────────────────
-    public function scopeActifs($query) { return $query->where('statut', 'actif'); }
+    public function scopeActifs($query)   { return $query->where('statut', 'actif'); }
+    public function scopeInactifs($query) { return $query->whereIn('statut', ['inactif', 'suspendu']); }
 
     // ── Génération du matricule ─────────────────────────────────────
     /**

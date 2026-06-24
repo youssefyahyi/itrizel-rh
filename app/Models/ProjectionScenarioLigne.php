@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\UniteOrganisationnelle;
 
 class ProjectionScenarioLigne extends Model
 {
     protected $fillable = [
         'scenario_id', 'type', 'mois_effet',
-        'pourcentage', 'categorie_id', 'salaire_estime', 'employe_id',
+        'pourcentage', 'categorie_id', 'salaire_estime', 'employe_id', 'unite_id',
     ];
 
     protected $casts = [
@@ -39,6 +40,11 @@ class ProjectionScenarioLigne extends Model
         return $this->belongsTo(Employe::class);
     }
 
+    public function unite(): BelongsTo
+    {
+        return $this->belongsTo(UniteOrganisationnelle::class, 'unite_id');
+    }
+
     public function getLibelleAttribute(): string
     {
         return match ($this->type) {
@@ -50,6 +56,7 @@ class ProjectionScenarioLigne extends Model
             'embauche' => 'Embauche '
                 . ($this->categorie ? $this->categorie->nom : '—')
                 . ' ' . number_format($this->salaire_estime, 0, ',', ' ') . ' DH'
+                . ($this->unite ? ' / ' . $this->unite->nom : '')
                 . ' dès ' . $this->mois_effet->format('m/Y'),
             'depart' => 'Départ '
                 . ($this->employe ? $this->employe->nom_complet : '—')
