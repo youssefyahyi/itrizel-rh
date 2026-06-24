@@ -23,6 +23,7 @@ use App\Http\Controllers\ProjectionController;
 use App\Http\Controllers\CodificationController;
 use App\Http\Controllers\OutilsController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\SavedViewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,6 +41,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('conges',      CongeController::class)->parameters(['conges' => 'conge']);
     Route::resource('evaluations', EvaluationController::class)->parameters(['evaluations' => 'evaluation']);
     Route::resource('formations',  FormationController::class)->parameters(['formations' => 'formation']);
+
+    // Vues sauvegardées — interdit aux salariés
+    Route::middleware('not.salarie')->group(function () {
+        Route::post('vues-filtres',           [SavedViewController::class, 'store'])->name('vues.store');
+        Route::delete('vues-filtres/{vue}',   [SavedViewController::class, 'destroy'])->name('vues.destroy');
+    });
 
     // ── Modules interdits aux salariés ─────────────────────────────────
     Route::middleware('not.salarie')->group(function () {

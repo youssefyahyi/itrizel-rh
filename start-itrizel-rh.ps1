@@ -12,7 +12,7 @@ Remove-Item "C:\xampp\htdocs\itrizel-rh\public\hot" -Force -ErrorAction Silently
 Write-Host "[2/5] MySQL..." -ForegroundColor Yellow
 $mysql = Get-Process mysqld -ErrorAction SilentlyContinue
 if (-not $mysql) {
-    Remove-Item "C:\xampp\mysql\data\mysql.pid" -Force -ErrorAction SilentlyContinue
+    Remove-Item "C:\xampp\mysql\data\*.pid" -Force -ErrorAction SilentlyContinue
     Start-Process "C:\xampp\mysql\bin\mysqld.exe" -ArgumentList "--defaults-file=C:\xampp\mysql\bin\my.ini" -WindowStyle Hidden
     Start-Sleep 4
 }

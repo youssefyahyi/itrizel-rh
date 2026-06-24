@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\SavedView;
+use Illuminate\Http\Request;
+
+class SavedViewController extends Controller
+{
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'module'      => 'required|string|max:50',
+            'nom'         => 'required|string|max:100',
+            'filtres'     => 'required|array',
+            'visibilite'  => 'required|in:prive,equipe,public',
+        ]);
+
+        $user = auth()->user();
+
+        $count = SavedView::where('module', $data['module'])
+            ->where('user_id', $user->id)
+            ->count();
+
+        if ($count >= 5) {
+            return back()->with('error', 'Limite de 5 vues par module atteinte.');
+        }
+
+        SavedView::create([...$data, 'user_id' => $user->id]);
+
+        return back()->with('success', 'Vue "' . $data['nom'] . '" enregistrée.');
+    }
+
+    public function destroy(SavedView $vue)
+    {
+        if ($vue->user_id !== auth()->id()) abort(403);
+        $vue->delete();
+        return back()->with('success', 'Vue supprimée.');
+    }
+}

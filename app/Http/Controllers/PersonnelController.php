@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateEmployeRequest;
 use App\Models\AuditLog;
 use App\Models\CategorieEmploye;
 use App\Models\Employe;
+use App\Models\SavedView;
 use App\Models\UniteOrganisationnelle;
 use Illuminate\Http\Request;
 
@@ -94,7 +95,20 @@ class PersonnelController extends Controller
         $unites      = UniteOrganisationnelle::orderBy("nom")->get(["id", "nom", "type"]);
         $filtreCategories = CategorieEmploye::orderBy("nom")->get(["id", "nom"]);
 
-        return view("personnel.index", compact("employes", "stats", "fiches", "categories", "unites", "filtreCategories"));
+        $user = auth()->user();
+        $savedViews = SavedView::pourModule('personnel')
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function ($q2) use ($user) {
+                      $q2->where('visibilite', 'equipe')
+                         ->whereHas('user', fn($u) => $u->where('unite_id', $user->unite_id));
+                  })
+                  ->orWhere('visibilite', 'public');
+            })
+            ->orderBy('nom')
+            ->get();
+
+        return view("personnel.index", compact("employes", "stats", "fiches", "categories", "unites", "filtreCategories", "savedViews"));
     }
 
     // ── Formulaire création ────────────────────────────────────────
