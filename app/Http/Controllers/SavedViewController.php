@@ -28,7 +28,8 @@ class SavedViewController extends Controller
 
         SavedView::create([...$data, 'user_id' => $user->id]);
 
-        return back()->with('success', 'Vue "' . $data['nom'] . '" enregistrée.');
+        $retour = $request->input('_retour', back()->getTargetUrl());
+        return redirect($retour)->with('success', 'Vue "' . $data['nom'] . '" enregistrée.');
     }
 
     public function destroy(SavedView $vue)

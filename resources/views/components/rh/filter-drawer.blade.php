@@ -82,8 +82,8 @@
     <div class="fd-footer">
         <button type="button" class="fd-clear-btn" onclick="fdClear()">Effacer tout</button>
         <div style="display:flex;gap:6px;align-items:center;">
-            @if($module)
-            <button type="button" class="fd-save-btn" onclick="fdOpenSave()">Enregistrer</button>
+            @if($module && $activeCount)
+            <button type="button" class="fd-save-btn" onclick="fdOpenSave()">Enregistrer vue</button>
             @endif
             <button type="button" class="btn btn-primary btn-sm" onclick="fdApply()">Appliquer →</button>
         </div>
@@ -110,6 +110,7 @@
         <input type="hidden" name="nom" id="fd-save-form-nom">
         <input type="hidden" name="visibilite" id="fd-save-form-vis">
         <input type="hidden" name="filtres" id="fd-save-form-filtres">
+        <input type="hidden" name="_retour" id="fd-save-form-retour">
     </form>
     @endif
 </div>
@@ -264,17 +265,18 @@
         const nom = document.getElementById('fd-save-nom').value.trim();
         if (!nom) { document.getElementById('fd-save-nom').focus(); return; }
 
+        // Lire les filtres depuis l'URL courante (filtres déjà appliqués)
+        const url = new URL(window.location.href);
         const filtres = {};
-        document.querySelectorAll('.fd-row').forEach(row => {
-            const key = row.querySelector('.fd-key-sel').value;
-            const el  = row.querySelector('.fd-value');
-            const val = el ? el.value.trim() : '';
-            if (key && val) filtres[key] = val;
+        FD_FIELDS.forEach(f => {
+            const val = url.searchParams.get(f.key);
+            if (val) filtres[f.key] = val;
         });
 
         document.getElementById('fd-save-form-nom').value     = nom;
         document.getElementById('fd-save-form-vis').value     = document.getElementById('fd-save-visibilite').value;
         document.getElementById('fd-save-form-filtres').value = JSON.stringify(filtres);
+        document.getElementById('fd-save-form-retour').value  = window.location.href;
         document.getElementById('fd-save-form').submit();
     };
 
