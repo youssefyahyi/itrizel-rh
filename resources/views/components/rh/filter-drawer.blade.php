@@ -255,6 +255,7 @@
 
     // ── Enregistrer une vue ───────────────────────────────────────────
     window.fdOpenSave = function () {
+        document.getElementById('fd-save-nom').value = '';
         document.getElementById('fd-save-modal').style.display = 'block';
         document.getElementById('fd-save-nom').focus();
     };
