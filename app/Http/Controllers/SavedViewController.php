@@ -10,11 +10,17 @@ class SavedViewController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'module'      => 'required|string|max:50',
-            'nom'         => 'required|string|max:100',
-            'filtres'     => 'required|array',
-            'visibilite'  => 'required|in:prive,equipe,public',
+            'module'     => 'required|string|max:50',
+            'nom'        => 'required|string|max:100',
+            'filtres'    => 'required|string',
+            'visibilite' => 'required|in:prive,equipe,public',
         ]);
+
+        $filtres = json_decode($data['filtres'], true);
+        if (!is_array($filtres) || empty($filtres)) {
+            return back()->with('error', 'Aucun filtre actif à enregistrer.');
+        }
+        $data['filtres'] = $filtres;
 
         $user = auth()->user();
 
