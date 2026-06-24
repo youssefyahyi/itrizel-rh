@@ -208,7 +208,12 @@
         </div>`;
 
         document.getElementById('fd-add-btn').insertAdjacentHTML('beforebegin', html);
-        if (key) document.getElementById('fd-row-' + id).querySelector('.fd-key-sel').value = key;
+        if (key) {
+            const keySel = document.getElementById('fd-row-' + id).querySelector('.fd-key-sel');
+            for (let i = 0; i < keySel.options.length; i++) {
+                if (keySel.options[i].value === key) { keySel.selectedIndex = i; break; }
+            }
+        }
         refreshKeyOptions();
     };
 
