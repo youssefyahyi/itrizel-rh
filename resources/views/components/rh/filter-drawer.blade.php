@@ -330,8 +330,16 @@
     padding:10px 10px; background:var(--surface-soft);
     border:1px solid var(--border-light); border-radius:8px;
 }
-.fd-key-sel, .fd-value {
-    flex:1; min-width:0; padding:7px 9px;
+.fd-key-sel {
+    flex:0 0 38%; min-width:0; padding:7px 9px;
+    border:1px solid var(--border); border-radius:6px;
+    font-size:12px; color:var(--text-primary);
+    background:var(--surface); font-family:inherit; outline:none;
+    cursor:pointer; overflow:hidden;
+}
+.fd-val-wrap { flex:1; min-width:0; display:flex; }
+.fd-value {
+    flex:1; min-width:0; width:100%; padding:7px 9px;
     border:1px solid var(--border); border-radius:6px;
     font-size:12px; color:var(--text-primary);
     background:var(--surface); font-family:inherit; outline:none;
