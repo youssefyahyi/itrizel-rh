@@ -93,8 +93,8 @@
     @if($module)
     <div id="fd-save-modal" style="display:none;position:absolute;bottom:70px;right:16px;left:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:10;">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-primary);">Enregistrer cette vue</div>
-        <input type="text" id="fd-save-nom" placeholder="Nom de la vue…" class="fd-key-sel" style="width:100%;margin-bottom:8px;">
-        <select id="fd-save-visibilite" class="fd-key-sel" style="width:100%;margin-bottom:10px;">
+        <input type="text" id="fd-save-nom" placeholder="Nom de la vue…" class="fd-input fd-modal-field" style="width:100%;margin-bottom:8px;">
+        <select id="fd-save-visibilite" class="fd-select fd-modal-field" style="width:100%;margin-bottom:10px;">
             <option value="prive">&#128274; Privée (moi uniquement)</option>
             <option value="equipe">&#128101; Équipe (mon unité)</option>
             <option value="public">&#127760; Publique (tous les gestionnaires)</option>
@@ -394,6 +394,12 @@
 }
 .fd-view-del:hover { background:#FEE2E2;color:var(--danger); }
 .fd-views-empty { font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 2px; }
+.fd-modal-field {
+    padding:7px 9px; border:1px solid var(--border); border-radius:6px;
+    font-size:12px; color:var(--text-primary); background:var(--surface);
+    font-family:inherit; outline:none;
+}
+.fd-modal-field:focus { border-color:var(--accent); }
 .fd-save-btn {
     background:none;border:1px solid var(--border);border-radius:6px;
     padding:6px 12px;font-size:12px;color:var(--text-secondary);
