@@ -96,14 +96,18 @@ class PersonnelController extends Controller
         $filtreCategories = CategorieEmploye::orderBy("nom")->get(["id", "nom"]);
 
         $user = auth()->user();
+        $userUniteId = $user->employe?->unite_id;
+
         $savedViews = SavedView::pourModule('personnel')
-            ->where(function ($q) use ($user) {
+            ->where(function ($q) use ($user, $userUniteId) {
                 $q->where('user_id', $user->id)
-                  ->orWhere(function ($q2) use ($user) {
-                      $q2->where('visibilite', 'equipe')
-                         ->whereHas('user', fn($u) => $u->where('unite_id', $user->unite_id));
-                  })
                   ->orWhere('visibilite', 'public');
+                if ($userUniteId) {
+                    $q->orWhere(function ($q2) use ($userUniteId) {
+                        $q2->where('visibilite', 'equipe')
+                           ->whereHas('user.employe', fn($e) => $e->where('unite_id', $userUniteId));
+                    });
+                }
             })
             ->orderBy('nom')
             ->get();
